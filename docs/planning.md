@@ -99,3 +99,26 @@ rd-machine/
 * User sets default R&D % or per-person value
 * System processes and shows results
 * User downloads summary or CT600L-ready table
+
+## Prelim look 
+
+### Home
+
+![image](https://github.com/user-attachments/assets/f107dc32-11f8-4743-bb28-0b4d60ecfc0f)
+![image](https://github.com/user-attachments/assets/5618ee70-406b-480f-9795-ff178e4b9fef)
+![image](https://github.com/user-attachments/assets/5bba199e-e3bb-4107-835e-93544b1e0a88)
+
+### Claim summary 
+
+![image](https://github.com/user-attachments/assets/f4ab8247-5532-423b-ab8a-d109f2492d2d)
+
+
+### Claim detail 
+
+![image](https://github.com/user-attachments/assets/b707bdfa-c30c-466b-8b06-8cfad6f02091)
+
+### Results
+
+![image](https://github.com/user-attachments/assets/b23db603-91e9-465b-8c4f-babbfbcdbed4)
+
+
