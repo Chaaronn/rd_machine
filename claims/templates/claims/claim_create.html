@@ -20,9 +20,19 @@
                             <label for="claim_name" class="form-label">Claim Name</label>
                             <input type="text" class="form-control" id="claim_name" name="claim_name" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="accounting_period" class="form-label">Accounting Period</label>
-                            <input type="text" class="form-control" id="accounting_period" name="accounting_period" placeholder="e.g., 2023-2024" required>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="accounting_period_start" class="form-label">Accounting Period Start</label>
+                                    <input type="date" class="form-control" id="accounting_period_start" name="accounting_period_start" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="accounting_period_end" class="form-label">Accounting Period End</label>
+                                    <input type="date" class="form-control" id="accounting_period_end" name="accounting_period_end" required>
+                                </div>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="company_name" class="form-label">Company Name</label>

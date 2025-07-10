@@ -70,20 +70,44 @@ def claim_create(request):
     if request.method == 'POST':
         # Get form data
         claim_name = request.POST.get('claim_name', '')
-        accounting_period = request.POST.get('accounting_period', '')
+        accounting_period_start = request.POST.get('accounting_period_start', '')
+        accounting_period_end = request.POST.get('accounting_period_end', '')
         company_name = request.POST.get('company_name', '')
         description = request.POST.get('description', '')
         
         # Validate required fields
-        if not claim_name or not accounting_period or not company_name:
+        if not claim_name or not accounting_period_start or not accounting_period_end or not company_name:
             messages.error(request, 'Please fill in all required fields.')
+            return render(request, 'claims/claim_create.html', {'title': 'Create New Claim'})
+        
+        # Validate dates
+        try:
+            start_date = datetime.strptime(accounting_period_start, '%Y-%m-%d').date()
+            end_date = datetime.strptime(accounting_period_end, '%Y-%m-%d').date()
+
+            # TODO: Add extended period detection
+            # Could maybe be useful to add an extended flag to the model
+            
+            if start_date >= end_date:
+                messages.error(request, 'End date must be after start date.')
+                return render(request, 'claims/claim_create.html', {'title': 'Create New Claim'})
+
+            # TODO: Add leap year handling
+            if abs((end_date - start_date).days) < 365:
+                messages.error(request, 'Accounting Period must be at least 12 months.')
+                return render(request, 'claims/claim_create.html', {'title': 'Create New Claim'})
+            
+            
+        except ValueError:
+            messages.error(request, 'Please enter valid dates.')
             return render(request, 'claims/claim_create.html', {'title': 'Create New Claim'})
         
         # Create new claim
         claim = Claim.objects.create(
             name=claim_name,
             company=company_name,
-            accounting_period=accounting_period,
+            accounting_period_start=start_date,
+            accounting_period_end=end_date,
             description=description,
             created_by=request.user,
             status='draft'
@@ -103,19 +127,42 @@ def claim_update(request, pk):
     claim = get_object_or_404(Claim, pk=pk, created_by=request.user)
     
     if request.method == 'POST':
-        # Update claim fields
-        claim.name = request.POST.get('claim_name', claim.name)
-        claim.accounting_period = request.POST.get('accounting_period', claim.accounting_period)
-        claim.company = request.POST.get('company_name', claim.company)
-        claim.description = request.POST.get('description', claim.description)
+        # Get form data
+        claim_name = request.POST.get('claim_name', claim.name)
+        accounting_period_start = request.POST.get('accounting_period_start', '')
+        accounting_period_end = request.POST.get('accounting_period_end', '')
+        company_name = request.POST.get('company_name', claim.company)
+        description = request.POST.get('description', claim.description)
         
         # Validate required fields
-        if not claim.name or not claim.accounting_period or not claim.company:
+        if not claim_name or not accounting_period_start or not accounting_period_end or not company_name:
             messages.error(request, 'Please fill in all required fields.')
         else:
-            claim.save()
-            messages.success(request, f'Claim "{claim.name}" updated successfully!')
-            return redirect('claims:claim_detail', pk=pk)
+            # Validate dates
+            try:
+                start_date = datetime.strptime(accounting_period_start, '%Y-%m-%d').date()
+                end_date = datetime.strptime(accounting_period_end, '%Y-%m-%d').date()
+                
+                if start_date >= end_date:
+                    messages.error(request, 'End date must be after start date.')
+                
+                if abs((end_date - start_date).days) < 365:
+                    messages.error(request, 'Accounting Period must be at least 12 months.')
+                    return render(request, 'claims/claim_update.html', {'title': 'Update Claim'})
+                
+                else:
+                    # Update claim fields
+                    claim.name = claim_name
+                    claim.accounting_period_start = start_date
+                    claim.accounting_period_end = end_date
+                    claim.company = company_name
+                    claim.description = description
+                    claim.save()
+                    
+                    messages.success(request, f'Claim "{claim.name}" updated successfully!')
+                    return redirect('claims:claim_detail', pk=pk)
+            except ValueError:
+                messages.error(request, 'Please enter valid dates.')
     
     context = {
         'title': 'Update Claim',
@@ -150,7 +197,9 @@ def upload_data(request, claim_id):
     if request.method == 'POST':
         # Handle file upload
         uploaded_file = request.FILES.get('data_file')
-        if uploaded_file:
+        file_type = request.POST.get('file_type', 'other')
+        
+        if uploaded_file and file_type:
             # Create attachment record
             attachment = Attachment.objects.create(
                 claim=claim,
@@ -158,13 +207,16 @@ def upload_data(request, claim_id):
                 original_filename=uploaded_file.name,
                 file_path=uploaded_file,
                 file_size=uploaded_file.size,
-                file_type='payroll',  # Default to payroll, can be changed later
+                file_type=file_type,
                 uploaded_by=request.user
             )
             messages.success(request, 'File uploaded successfully!')
             return redirect('claims:column_mapping', claim_id=claim_id)
         else:
-            messages.error(request, 'Please select a file to upload.')
+            if not uploaded_file:
+                messages.error(request, 'Please select a file to upload.')
+            if not file_type:
+                messages.error(request, 'Please select a file type.')
     
     context = {
         'title': 'Upload File',

@@ -53,18 +53,18 @@ class GrantOrSubsidyInline(admin.TabularInline):
 class ClaimAdmin(admin.ModelAdmin):
     """Admin interface for Claims"""
     list_display = (
-        'name', 'company', 'accounting_period', 'status', 
+        'name', 'company', 'get_accounting_period_display', 'status', 
         'total_costs_display', 'eligible_costs_display', 
         'credit_amount_display', 'created_by', 'created_at'
     )
-    list_filter = ('status', 'accounting_period', 'created_at', 'created_by')
+    list_filter = ('status', 'accounting_period_start', 'accounting_period_end', 'created_at', 'created_by')
     search_fields = ('name', 'company', 'description')
     ordering = ('-created_at',)
     readonly_fields = ('id', 'created_at', 'updated_at', 'get_eligible_percentage')
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'company', 'accounting_period', 'description', 'status')
+            'fields': ('name', 'company', 'accounting_period_start', 'accounting_period_end', 'description', 'status')
         }),
         ('Financial Summary', {
             'fields': ('total_costs', 'eligible_costs', 'credit_amount', 'get_eligible_percentage'),

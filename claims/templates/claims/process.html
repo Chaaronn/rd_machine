@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block title %}Process Claim - R&D Machine{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'claims:claim_list' %}">Claims</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'claims:claim_detail' claim_id %}">Claim #{{ claim_id }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Process</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Process R&D Claim</h2>
+                <span class="badge bg-info">Claim #{{ claim_id }}</span>
+            </div>
+            <p class="text-muted">Review and process your R&D claim data to generate calculations and reports.</p>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="row mb-4">
+            <div class="col-md-12">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cogs me-2"></i>
+                        Process Claim Data
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Processing Status:</strong> Ready to process claim data and generate calculations.
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Processing Options</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="calculate_restrictions" name="calculate_restrictions" checked>
+                                <label class="form-check-label" for="calculate_restrictions">
+                                    Calculate EPW restrictions and caps
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="apply_grant_adjustments" name="apply_grant_adjustments" checked>
+                                <label class="form-check-label" for="apply_grant_adjustments">
+                                    Apply grant and subsidy adjustments
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="generate_summary" name="generate_summary" checked>
+                                <label class="form-check-label" for="generate_summary">
+                                    Generate cost category summaries
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'claims:claim_detail' claim_id %}" class="btn btn-outline-secondary me-md-2">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-play me-2"></i>
+                                Process Claim
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Processing Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h6>What will be processed:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Cost line items and calculations</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i>EPW restrictions and caps</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Grant and subsidy adjustments</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Cost category summaries</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Eligible percentage calculations</li>
+                    </ul>
+
+                    <div class="alert alert-warning mt-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Note:</strong> Processing may take a few moments depending on the amount of data.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Claim Summary
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Total Costs</small>
+                            <div class="fw-bold">£{{ claim.total_costs|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Eligible Costs</small>
+                            <div class="fw-bold">£{{ claim.eligible_costs|floatformat:2 }}</div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6">
+                            <small class="text-muted">Credit Amount</small>
+                            <div class="fw-bold">£{{ claim.credit_amount|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Eligible %</small>
+                            <div class="fw-bold">{{ claim.get_eligible_percentage|floatformat:1 }}%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

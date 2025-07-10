@@ -25,11 +25,11 @@ Claimer.com — but open, advisor-friendly, and extensible.
 
 * 1 . Claim Calculation Logic
     + Support per-employee overrides (e.g. Alice = 100%, Bob = 50%)
-    + Allow EPW “connected/unconnected” tagging
-    + Cap EPW at 65% of eligible cost
-    + Automatically apply NIC uplift and adjustable percentages
-    + Add grant/subsidy tracking at cost line level
-    + Flag potentially ineligible costs (e.g. high PILON, bonuses)
+    + Allow EPW/Subcon “connected/unconnected” tagging
+        - Cap at 65% of eligible cost
+    + Automatically apply NIC cap and adjustable percentages
+    + Add grant/subsidy tracking at cost line level and final level
+    + Flag potentially ineligible costs (e.g. PILON, bonuses, recharges)
 
 * 2. Data Mapping & Import 
     + Pre-save mapping templates for common formats (Xero, Sage, etc.)
@@ -68,31 +68,112 @@ Claimer.com — but open, advisor-friendly, and extensible.
 ## Structure
 
 ```
-rd-machine/
-├── app.py
-├── templates/
-│   ├── upload.html
-│   ├── map_columns.html
-│   └── results.html
-├── static/
-│   └── styles.css
-├── rd_logic/
-│   ├── processor.py
-│   ├── mappings.py
-│   └── reporter.py
-├── uploads/
-├── config/
-│   └── settings.yaml
-├── data/
-│   └── sample_payroll.xlsx
-├── README.md
+rd_machine/
+├── manage.py
 ├── requirements.txt
-└── Dockerfile
+├── README.md
+├── rd_claimer/                    # Django project settings
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   ├── views.py
+│   ├── asgi.py
+│   └── wsgi.py
+├── claims/                        # Main claims app
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── tests.py
+│   ├── logic/                     # R&D calculation logic
+│   │   ├── processor.py
+│   │   ├── reporter.py
+│   │   └── rules.yaml
+│   ├── management/                # Django management commands
+│   │   └── commands/
+│   │       └── populate_sample_data.py
+│   ├── migrations/
+│   ├── static/claims/
+│   │   └── styles.css
+│   └── templates/claims/
+│       ├── claim_create.html
+│       ├── claim_detail.html
+│       ├── claim_list.html
+│       ├── claim_update.html
+│       ├── claim_delete.html
+│       ├── cost_category_detail.html
+│       ├── mapping_create.html
+│       ├── mapping_list.html
+│       ├── mapping.html
+│       ├── narrative.html
+│       ├── results.html
+│       └── upload.html
+├── users/                         # User management app
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── tests.py
+│   ├── migrations/
+│   └── templates/users/
+│       ├── login.html
+│       ├── register.html
+│       ├── profile.html
+│       └── edit_profile.html
+├── templates/                     # Base templates
+│   ├── base.html
+│   └── home.html
+├── config/                        # Configuration files
+│   └── example_mapping.yaml
+├── scripts/                       # Utility scripts
+│   └── import_claim_data.py
+└── docs/                         # Documentation
+    ├── planning.md
+    └── changelog.md
 ```
+
+## R&D Rules
+
+### Overall
+
+* Client level tagging
+    + SME / RDEC 
+        - This would affect the calculations for any claim created
+    + Specific mappings
+
+### Staff 
+
+No specific rules needed here, its more to do with the tagging of columns
+to ensure the correct items are included/excluded. 
+
+Needs to be a method for estimating PAYE cap for SME claims
+
+### Subcontractors 
+
+Needs to be a method of tagging un/connected
+
+When unconnected, restrict to 65% 
+When connected, prompt for user input for the lesser of comparison 
+* Lesser of; amount paid to subcontractor vs amount spent by subcon
+
+This is similar for EPWs. 
+
+
 
 ## Flow
 
-### User
+### Creating new client 
+
+
+* User add cli
+
+
+### Claim
 
 * User uploads data file (Excel/CSV)
 * System extracts column headers

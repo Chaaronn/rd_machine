@@ -21,7 +21,20 @@ class Claim(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200, help_text="Descriptive name for the claim")
     company = models.CharField(max_length=200, help_text="Company name")
-    accounting_period = models.CharField(max_length=50, help_text="e.g., 2023-2024")
+
+    # Date range for the accounting period
+    # This allows for the calculation of period specific rates (e.g., 14.5% pre 1 April 2023)
+    accounting_period_start = models.DateField(
+        default=timezone.datetime(2024, 4, 1).date(),
+        help_text="Start date of accounting period"
+    )
+    accounting_period_end = models.DateField(
+        default=timezone.datetime(2025, 3, 31).date(),
+        help_text="End date of accounting period"
+    )
+
+    
+
     description = models.TextField(blank=True, help_text="Brief description of R&D activities")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     
@@ -59,11 +72,11 @@ class Claim(models.Model):
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['status', 'created_at']),
-            models.Index(fields=['company', 'accounting_period']),
+            models.Index(fields=['company', 'accounting_period_start', 'accounting_period_end']),
         ]
     
     def __str__(self):
-        return f"{self.name} - {self.company} ({self.accounting_period})"
+        return f"{self.name} - {self.company} ({self.accounting_period_start.year}-{self.accounting_period_end.year})"
     
     def get_eligible_percentage(self):
         """Calculate the percentage of eligible costs"""
@@ -74,6 +87,44 @@ class Claim(models.Model):
     def calculate_credit_amount(self):
         """Calculate R&D tax credit amount (26% of eligible costs for SMEs)"""
         return self.eligible_costs * 0.26
+    
+    def get_accounting_period_display(self):
+        """Get formatted accounting period string"""
+        return f"{self.accounting_period_start.year}-{self.accounting_period_end.year}"
+    
+    def get_r_and_d_rate(self):
+        """Get the applicable R&D rate based on the accounting period"""
+        # Rate changes from 1 April 2023
+        rate_change_date = timezone.datetime(2023, 4, 1).date()
+        
+
+        # This doesn't work in legislation, it needs to account for if the date is between the range
+        # Then, we will need to flag specific line items occuring before this date 
+        # Basically, generating two sets of costs for pre/post
+
+        # This should also return the additional deduciton
+        # at either 1.3 or .86 depending on regime/dates/
+
+        # This could also maybe handle the merged regime
+
+        if self.accounting_period_start <= rate_change_date:
+            return Decimal('0.145')  # 14.5%
+        else:
+            return Decimal('0.1')   # 10%
+
+        
+    
+    def calculate_credit_amount_with_rate(self):
+        """Calculate R&D tax credit amount using period-specific rate"""
+
+        # Super basic for now. In future, this need to be expanded to use 
+        # the additional deduciton/enhancment, or the lower of argument 
+
+        rate = self.get_r_and_d_rate()
+        
+        # add_deduct - self.eligible_costs * add_deduct_rate
+
+        return self.eligible_costs * rate
 
 
 class CostCategory(models.Model):
@@ -156,6 +207,15 @@ class CostLineItem(models.Model):
     company_name = models.CharField(max_length=200, blank=True, help_text="Company name for EPWs/subcontractors")
     role = models.CharField(max_length=200, blank=True, help_text="Job title/function/service description")
     r_and_d_activity = models.TextField(blank=True, help_text="Description of R&D work performed")
+
+    # Date when the cost was incurred
+    # This can be used in conjunction with rules on period rates
+    cost_date = models.DateField(
+        null=True, 
+        blank=True, 
+        help_text="Date when the cost was incurred (for period-specific calculations)"
+    )
+
     
     # Financial fields
     gross_amount = models.DecimalField(

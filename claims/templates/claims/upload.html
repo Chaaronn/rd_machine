@@ -54,7 +54,15 @@
                         {% csrf_token %}
                         
                         <div class="mb-3">
-                            {{ form.file_type|as_crispy_field }}
+                            <label for="file_type" class="form-label">File Type</label>
+                            <select class="form-select" id="file_type" name="file_type" required>
+                                <option value="">Select file type...</option>
+                                <option value="payroll">Payroll Data</option>
+                                <option value="trial_balance">Trial Balance</option>
+                                <option value="timesheet">Timesheet Data</option>
+                                <option value="invoice">Invoice Data</option>
+                                <option value="other">Other</option>
+                            </select>
                             <div class="form-text">
                                 <strong>File Type Guidelines:</strong>
                                 <ul class="mt-2 mb-0">
@@ -66,9 +74,10 @@
                         </div>
 
                         <div class="mb-3">
-                            {{ form.file|as_crispy_field }}
+                            <label for="data_file" class="form-label">Upload File</label>
+                            <input type="file" class="form-control" id="data_file" name="data_file" accept=".xlsx,.xls,.csv" required>
                             <div class="form-text">
-                                Supported formats: Excel (.xlsx), CSV (.csv). Maximum file size: 10MB.
+                                Supported formats: Excel (.xlsx, .xls), CSV (.csv). Maximum file size: 10MB.
                             </div>
                         </div>
 
@@ -154,7 +163,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // File input validation
-    const fileInput = document.getElementById('id_file');
+    const fileInput = document.getElementById('data_file');
     const maxSize = 10 * 1024 * 1024; // 10MB
     
     if (fileInput) {
