@@ -1,0 +1,298 @@
+# Example Column Mapping Configuration for R&D Claimer
+# This file contains example mapping configurations for common accounting systems
+
+# Xero Payroll Export Mapping
+xero_payroll:
+  name: "Xero Payroll Export"
+  description: "Standard mapping for Xero payroll export files"
+  file_format: "xlsx"
+  mapping:
+    employee_name: "Employee"
+    employee_id: "Employee ID"
+    gross_cost: "Gross Pay"
+    description: "Pay Item"
+    period_start: "Pay Period Start"
+    period_end: "Pay Period End"
+    department: "Department"
+    cost_centre: "Cost Centre"
+    hours_worked: "Hours"
+    hourly_rate: "Rate"
+    
+# Sage Payroll Export Mapping
+sage_payroll:
+  name: "Sage Payroll Export"
+  description: "Standard mapping for Sage payroll export files"
+  file_format: "csv"
+  mapping:
+    employee_name: "Name"
+    employee_id: "Employee No"
+    gross_cost: "Amount"
+    description: "Details"
+    period_start: "Date From"
+    period_end: "Date To"
+    department: "Dept"
+    ni_number: "NI Number"
+    tax_code: "Tax Code"
+
+# QuickBooks Payroll Export Mapping
+quickbooks_payroll:
+  name: "QuickBooks Payroll Export"
+  description: "Standard mapping for QuickBooks payroll export files"
+  file_format: "xlsx"
+  mapping:
+    employee_name: "Employee Name"
+    employee_id: "Employee ID"
+    gross_cost: "Total Pay"
+    description: "Memo"
+    period_start: "Pay Date"
+    period_end: "Period End"
+    department: "Class"
+    hours_worked: "Hours"
+    location: "Location"
+
+# Generic Trial Balance Mapping
+trial_balance_generic:
+  name: "Generic Trial Balance"
+  description: "Standard mapping for trial balance files"
+  file_format: "xlsx"
+  mapping:
+    account_code: "Account Code"
+    account_name: "Account Name"
+    description: "Description"
+    debit_amount: "Debit"
+    credit_amount: "Credit"
+    net_amount: "Net"
+    period: "Period"
+    department: "Department"
+
+# Timesheet Data Mapping
+timesheet_generic:
+  name: "Generic Timesheet"
+  description: "Standard mapping for timesheet files"
+  file_format: "xlsx"
+  mapping:
+    employee_name: "Employee"
+    employee_id: "Employee ID"
+    date: "Date"
+    hours_worked: "Hours"
+    project_code: "Project"
+    task_description: "Task"
+    billable_hours: "Billable Hours"
+    department: "Department"
+    cost_centre: "Cost Centre"
+
+# ADP Payroll Export Mapping
+adp_payroll:
+  name: "ADP Payroll Export"
+  description: "Standard mapping for ADP payroll export files"
+  file_format: "xlsx"
+  mapping:
+    employee_name: "Employee Name"
+    employee_id: "Employee ID"
+    gross_cost: "Gross Pay"
+    description: "Earnings Description"
+    period_start: "Pay Period Begin"
+    period_end: "Pay Period End"
+    department: "Department"
+    location: "Location"
+    hours_worked: "Hours"
+    file_number: "File Number"
+
+# IRIS Payroll Export Mapping
+iris_payroll:
+  name: "IRIS Payroll Export"
+  description: "Standard mapping for IRIS payroll export files"
+  file_format: "csv"
+  mapping:
+    employee_name: "Employee Name"
+    employee_id: "Employee Reference"
+    gross_cost: "Gross Pay"
+    description: "Pay Element"
+    period_start: "Period Start"
+    period_end: "Period End"
+    department: "Department"
+    ni_number: "NI Number"
+    tax_code: "Tax Code"
+
+# Moneysoft Payroll Export Mapping
+moneysoft_payroll:
+  name: "Moneysoft Payroll Export"
+  description: "Standard mapping for Moneysoft payroll export files"
+  file_format: "xlsx"
+  mapping:
+    employee_name: "Employee"
+    employee_id: "ID"
+    gross_cost: "Amount"
+    description: "Description"
+    period_start: "From"
+    period_end: "To"
+    department: "Dept"
+    hours_worked: "Hours"
+
+# Custom Field Definitions
+custom_fields:
+  # EPW (Externally Provided Worker) fields
+  epw_fields:
+    is_epw: "Is EPW"
+    epw_connected: "EPW Connected"
+    epw_company: "EPW Company"
+    epw_rate: "EPW Rate"
+    
+  # R&D specific fields
+  rd_fields:
+    rd_percentage: "R&D Percentage"
+    rd_project: "R&D Project"
+    rd_activity: "R&D Activity"
+    innovation_type: "Innovation Type"
+    
+  # Financial fields
+  financial_fields:
+    pension_cost: "Pension Cost"
+    ni_cost: "NI Cost"
+    benefit_cost: "Benefit Cost"
+    bonus_amount: "Bonus Amount"
+    overtime_hours: "Overtime Hours"
+    
+  # Metadata fields
+  metadata_fields:
+    upload_date: "Upload Date"
+    processed_by: "Processed By"
+    approval_status: "Approval Status"
+    comments: "Comments"
+
+# Validation Rules for Mappings
+validation_rules:
+  required_fields:
+    - employee_name
+    - gross_cost
+    - description
+    - period_start
+    
+  optional_fields:
+    - employee_id
+    - department
+    - hours_worked
+    - is_epw
+    - rd_percentage
+    
+  data_types:
+    employee_name: "string"
+    employee_id: "string"
+    gross_cost: "decimal"
+    description: "string"
+    period_start: "date"
+    period_end: "date"
+    hours_worked: "decimal"
+    rd_percentage: "decimal"
+    is_epw: "boolean"
+    
+  constraints:
+    gross_cost:
+      min_value: 0
+      max_value: 1000000
+    rd_percentage:
+      min_value: 0
+      max_value: 1
+    hours_worked:
+      min_value: 0
+      max_value: 168  # Max hours per week
+
+# Auto-mapping suggestions
+auto_mapping:
+  # Keywords that suggest specific field mappings
+  keywords:
+    employee_name:
+      - "employee"
+      - "name"
+      - "staff"
+      - "worker"
+      - "person"
+      
+    gross_cost:
+      - "gross"
+      - "pay"
+      - "salary"
+      - "amount"
+      - "cost"
+      - "total"
+      
+    description:
+      - "description"
+      - "desc"
+      - "detail"
+      - "memo"
+      - "note"
+      - "item"
+      
+    period_start:
+      - "start"
+      - "from"
+      - "begin"
+      - "date"
+      - "period"
+      
+    hours_worked:
+      - "hours"
+      - "time"
+      - "worked"
+      - "duration"
+      
+    department:
+      - "department"
+      - "dept"
+      - "division"
+      - "section"
+      
+  # Patterns for automatic detection
+  patterns:
+    date_fields:
+      - "\\d{2}/\\d{2}/\\d{4}"
+      - "\\d{4}-\\d{2}-\\d{2}"
+      - "\\d{2}-\\d{2}-\\d{4}"
+      
+    currency_fields:
+      - "£\\d+\\.\\d{2}"
+      - "\\d+\\.\\d{2}"
+      - "\\$\\d+\\.\\d{2}"
+      
+    percentage_fields:
+      - "\\d+%"
+      - "\\d+\\.\\d+%"
+      - "0\\.[0-9]+"
+
+# Export Templates
+export_templates:
+  ct600l_summary:
+    name: "CT600L Summary"
+    description: "Summary format for CT600L form"
+    fields:
+      - "total_rd_expenditure"
+      - "staff_costs"
+      - "epw_costs"
+      - "excluded_costs"
+      - "period_start"
+      - "period_end"
+      
+  detailed_breakdown:
+    name: "Detailed Breakdown"
+    description: "Detailed line-by-line breakdown"
+    fields:
+      - "employee_name"
+      - "description"
+      - "gross_cost"
+      - "rd_percentage"
+      - "qualifying_cost"
+      - "is_epw"
+      - "excluded"
+      - "exclusion_reason"
+      
+  employee_summary:
+    name: "Employee Summary"
+    description: "Summary by employee"
+    fields:
+      - "employee_name"
+      - "total_gross_cost"
+      - "total_qualifying_cost"
+      - "line_count"
+      - "rd_percentage"
+      - "is_epw" 

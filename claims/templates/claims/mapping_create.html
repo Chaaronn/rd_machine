@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Column Mapping - R&D Machine{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'claims:mapping_list' %}">Column Mappings</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Create New Mapping</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-plus me-2"></i>
+                        Create New Column Mapping
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="mapping_name" class="form-label">Mapping Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="mapping_name" name="mapping_name" required 
+                                           placeholder="e.g., Xero Payroll Export">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="system_type" class="form-label">Accounting System <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="system_type" name="system_type" required>
+                                        <option value="">Select system...</option>
+                                        <option value="xero">Xero</option>
+                                        <option value="sage">Sage</option>
+                                        <option value="quickbooks">QuickBooks</option>
+                                        <option value="adp">ADP</option>
+                                        <option value="iris">IRIS</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" 
+                                      placeholder="Brief description of this mapping template"></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5>Column Mappings</h5>
+                            <p class="text-muted">Map your file columns to R&D Machine fields:</p>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="employee_name_column" class="form-label">Employee Name Column</label>
+                                        <input type="text" class="form-control" id="employee_name_column" name="employee_name_column" 
+                                               placeholder="e.g., Employee Name, Full Name">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="gross_cost_column" class="form-label">Gross Cost Column</label>
+                                        <input type="text" class="form-control" id="gross_cost_column" name="gross_cost_column" 
+                                               placeholder="e.g., Gross Pay, Total Cost">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="period_column" class="form-label">Period/Date Column</label>
+                                        <input type="text" class="form-control" id="period_column" name="period_column" 
+                                               placeholder="e.g., Pay Period, Date">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="description_column" class="form-label">Description Column</label>
+                                        <input type="text" class="form-control" id="description_column" name="description_column" 
+                                               placeholder="e.g., Description, Job Title">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="department_column" class="form-label">Department Column (Optional)</label>
+                                        <input type="text" class="form-control" id="department_column" name="department_column" 
+                                               placeholder="e.g., Department, Division">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="epw_column" class="form-label">EPW Flag Column (Optional)</label>
+                                        <input type="text" class="form-control" id="epw_column" name="epw_column" 
+                                               placeholder="e.g., EPW, Employment Processing Worker">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Tip:</strong> You can create a mapping template now and refine the column mappings when you upload your first file. 
+                            This template will be available for future uploads from the same system.
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'claims:mapping_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Back to Mappings
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                Create Mapping
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

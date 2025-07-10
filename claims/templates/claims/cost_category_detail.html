@@ -1,0 +1,411 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ category.get_category_display }} Details - R&D Machine{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'claims:claim_list' %}">Claims</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'claims:claim_detail' claim.pk %}">{{ claim.name }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'claims:claim_results' claim.pk %}">Results</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ category.get_category_display }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="text-white">{{ category.get_category_display }} - Raw Data</h2>
+                <div>
+                    <span class="badge bg-info me-2">{{ claim.name }}</span>
+                    <span class="badge bg-secondary">{{ total_items }} items</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Total Gross</h6>
+                            <h3 class="mb-0">£{{ total_gross|floatformat:0 }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calculator fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Eligible Amount</h6>
+                            <h3 class="mb-0">£{{ total_eligible|floatformat:0 }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Excluded Amount</h6>
+                            <h3 class="mb-0">£{{ total_excluded|floatformat:0 }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-ban fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Final Rate</h6>
+                            <h3 class="mb-0">{{ category.get_eligible_percentage|floatformat:1 }}%</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-percent fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Main Data Table -->
+            <div class="card bg-dark">
+                <div class="card-header">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="fas fa-table me-2"></i>
+                        Individual Breakdown
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if category.description %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {{ category.description }}
+                    </div>
+                    {% endif %}
+
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped">
+                            <thead>
+                                <tr>
+                                    <th class="text-white">Name</th>
+                                    <th class="text-white">Role/Service</th>
+                                    <th class="text-white">Gross Amount</th>
+                                    <th class="text-white">R&D %</th>
+                                    <th class="text-white">Calculated</th>
+                                    <th class="text-white">Eligible</th>
+                                    <th class="text-white">Status</th>
+                                    <th class="text-white">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in line_items %}
+                                <tr class="{% if item.is_excluded %}table-warning{% endif %}">
+                                    <td class="text-white">
+                                        <strong>{{ item.name }}</strong>
+                                        {% if item.type == 'epw' %}
+                                            <br><small class="text-info">
+                                                <i class="fas fa-{% if item.connected %}link{% else %}unlink{% endif %} me-1"></i>
+                                                {{ item.get_connection_status }} EPW
+                                            </small>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-white">
+                                        {% if item.role %}
+                                            {{ item.role }}
+                                        {% elif item.r_and_d_activity %}
+                                            {{ item.r_and_d_activity|truncatewords:8 }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-white">£{{ item.gross_amount|floatformat:2 }}</td>
+                                    <td class="text-white">{{ item.r_and_d_percentage|floatformat:1 }}%</td>
+                                    <td class="text-white">
+                                        {% widthratio item.gross_amount 100 item.r_and_d_percentage as calculated %}
+                                        £{{ calculated|floatformat:2 }}
+                                    </td>
+                                    <td class="text-white">
+                                        {% if item.is_excluded %}
+                                            <span class="text-danger">£0.00</span>
+                                        {% else %}
+                                            <strong>£{{ item.eligible_amount|floatformat:2 }}</strong>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.is_excluded %}
+                                            <span class="badge bg-danger">Excluded</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Included</span>
+                                        {% endif %}
+                                        
+                                        {% if item.type == 'epw' %}
+                                            {% if item.connected %}
+                                                <span class="badge bg-info">Connected EPW</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Unconnected EPW - 65% cap</span>
+                                            {% endif %}
+                                        {% endif %}
+                                        
+                                        {% if item.grant_funded %}
+                                            <span class="badge bg-secondary">Grant</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-white">
+                                        {% if item.notes %}
+                                            <span title="{{ item.notes }}">
+                                                {{ item.notes|truncatewords:5 }}
+                                                {% if item.notes|wordcount > 5 %}...{% endif %}
+                                            </span>
+                                        {% endif %}
+                                        {% if item.exclusion_reason %}
+                                            <br><small class="text-warning">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                                {{ item.exclusion_reason }}
+                                            </small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-white-50 py-4">
+                                        <i class="fas fa-inbox fa-2x mb-2"></i>
+                                        <br>No line items in this category
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {% if epw_items %}
+            <!-- EPW Restrictions Section -->
+            <div class="card bg-dark mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="fas fa-user-tie me-2"></i>
+                        EPW Restrictions & Calculations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>EPW Rules:</strong> Unconnected EPWs are subject to a 65% cap on qualifying expenditure.
+                        Connected EPWs have no restriction.
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-dark">
+                            <thead>
+                                <tr>
+                                    <th class="text-white">EPW Name</th>
+                                    <th class="text-white">Connection Status</th>
+                                    <th class="text-white">Original Amount</th>
+                                    <th class="text-white">Restriction</th>
+                                    <th class="text-white">Final Amount</th>
+                                    <th class="text-white">Impact</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for calc in epw_calculations %}
+                                <tr>
+                                    <td class="text-white">{{ calc.item.name }}</td>
+                                    <td>
+                                        {% if calc.item.connected %}
+                                            <span class="badge bg-success">{{ calc.connection_status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">{{ calc.connection_status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-white">£{{ calc.original_amount|floatformat:2 }}</td>
+                                    <td class="text-white">{{ calc.restriction_rate }}</td>
+                                    <td class="text-white">
+                                        <strong>£{{ calc.capped_amount|floatformat:2 }}</strong>
+                                    </td>
+                                    <td>
+                                        {% if calc.restriction_applied %}
+                                            <span class="text-danger">
+                                                <i class="fas fa-arrow-down me-1"></i>
+                                                -£{{ calc.reduction_amount|floatformat:2 }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-success">
+                                                <i class="fas fa-check me-1"></i>
+                                                No impact
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <!-- Statistics Card -->
+            <div class="card bg-dark mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0 text-white">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Category Statistics
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-8 text-white">Total Items:</dt>
+                        <dd class="col-sm-4 text-white">{{ total_items }}</dd>
+                        
+                        <dt class="col-sm-8 text-white">Included:</dt>
+                        <dd class="col-sm-4 text-white">{{ stats.included_count }}</dd>
+                        
+                        <dt class="col-sm-8 text-white">Excluded:</dt>
+                        <dd class="col-sm-4 text-white">{{ stats.excluded_count }}</dd>
+                        
+                        <dt class="col-sm-8 text-white">EPW Items:</dt>
+                        <dd class="col-sm-4 text-white">{{ stats.epw_count }}</dd>
+                        
+                        <dt class="col-sm-8 text-white">Grant Funded:</dt>
+                        <dd class="col-sm-4 text-white">{{ stats.grant_funded_count }}</dd>
+                    </dl>
+                    
+                    <div class="progress mt-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {% widthratio stats.included_count total_items 100 %}%">
+                            {% widthratio stats.included_count total_items 100 %}% Included
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final Calculation -->
+            <div class="card bg-dark mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0 text-white">
+                        <i class="fas fa-calculator me-2"></i>
+                        Final Calculation
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="calculation-steps">
+                        <div class="step mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-white">Total Gross Costs:</span>
+                                <span class="text-white">£{{ total_gross|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="step mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-white">Less: Excluded Items:</span>
+                                <span class="text-danger">-£{{ total_excluded|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                        
+                        {% if category.category == 'epw' %}
+                        <div class="step mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-white">Less: EPW Restrictions:</span>
+                                <span class="text-warning">
+                                    {% for calc in epw_calculations %}
+                                        {% if calc.restriction_applied %}
+                                            -£{{ calc.reduction_amount|floatformat:2 }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <hr class="border-light">
+                        
+                        <div class="step">
+                            <div class="d-flex justify-content-between">
+                                <strong class="text-white">Final Eligible Amount:</strong>
+                                <strong class="text-success">£{{ total_eligible|floatformat:2 }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Options -->
+            <div class="card bg-dark">
+                <div class="card-header">
+                    <h6 class="card-title mb-0 text-white">
+                        <i class="fas fa-download me-2"></i>
+                        Export Category
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="#" class="btn btn-outline-light">
+                            <i class="fas fa-file-excel me-2"></i>
+                            Export to Excel
+                        </a>
+                        <a href="#" class="btn btn-outline-light">
+                            <i class="fas fa-file-csv me-2"></i>
+                            Export to CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="{% url 'claims:claim_results' claim.pk %}" class="btn btn-outline-light">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Back to Results
+                    </a>
+                </div>
+                <div>
+                    <a href="{% url 'claims:claim_detail' claim.pk %}" class="btn btn-outline-light me-2">
+                        <i class="fas fa-eye me-2"></i>
+                        View Claim
+                    </a>
+                    <a href="{% url 'claims:export_claim' claim.pk %}" class="btn btn-success">
+                        <i class="fas fa-download me-2"></i>
+                        Export Claim
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

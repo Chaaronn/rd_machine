@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ claim.name }} - R&D Machine{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    {% if claim %}
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'claims:claim_list' %}">Claims</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">{{ claim.name }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h2 text-white">{{ claim.name }}</h1>
+                <span class="badge {% if claim.status == 'Completed' %}bg-success{% elif claim.status == 'In Progress' %}bg-warning{% else %}bg-secondary{% endif %} fs-6">
+                    {{ claim.status }}
+                </span>
+            </div>
+            <p class="text-white">{{ claim.description }}</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group" role="group">
+                <a href="{% url 'claims:claim_update' claim.id %}" class="btn btn-outline-light">
+                    <i class="fas fa-edit me-2"></i>
+                    Edit
+                </a>
+                <a href="{% url 'claims:claim_delete' claim.id %}" class="btn btn-outline-danger">
+                    <i class="fas fa-trash me-2"></i>
+                    Delete
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Claim Information -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card bg-dark">
+                <div class="card-header">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Claim Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong class="text-white">Company:</strong></div>
+                        <div class="col-sm-8 text-white">{{ claim.company }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong class="text-white">Period:</strong></div>
+                        <div class="col-sm-8 text-white">{{ claim.accounting_period }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong class="text-white">Status:</strong></div>
+                        <div class="col-sm-8">
+                            <span class="badge {% if claim.status == 'Completed' %}bg-success{% elif claim.status == 'In Progress' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                {{ claim.status }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong class="text-white">Created:</strong></div>
+                        <div class="col-sm-8 text-white">{{ claim.created_at }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4"><strong class="text-white">Description:</strong></div>
+                        <div class="col-sm-8 text-white">{{ claim.description }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card bg-dark">
+                <div class="card-header">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Financial Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-12 mb-3">
+                            <div class="border-bottom border-secondary pb-3">
+                                <h3 class="text-white">£{{ claim.total_costs|floatformat:0 }}</h3>
+                                <small class="text-white-50">Total Costs</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-white">£{{ claim.eligible_costs|floatformat:0 }}</h4>
+                            <small class="text-white-50">Eligible Costs</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-white">£{{ claim.credit_amount|floatformat:0 }}</h4>
+                            <small class="text-white-50">R&D Credit</small>
+                        </div>
+                    </div>
+                    
+                    {% if claim.total_costs > 0 %}
+                    <div class="mt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <small class="text-white">Eligible Rate</small>
+                            <small class="text-white">{{ claim.eligible_costs|floatformat:0 }}/{{ claim.total_costs|floatformat:0 }} = {% widthratio claim.eligible_costs claim.total_costs 100 %}%</small>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" style="width: {% widthratio claim.eligible_costs claim.total_costs 100 %}%"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Steps -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark">
+                <div class="card-header">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="fas fa-tasks me-2"></i>
+                        Process Steps
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2 text-center">
+                            <div class="mb-3">
+                                <div class="btn btn-outline-light btn-lg rounded-circle" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-upload"></i>
+                                </div>
+                            </div>
+                            <h6 class="text-white">Upload Data</h6>
+                            <p class="text-white-50 small">Upload payroll and financial data</p>
+                            <a href="{% url 'claims:upload_data' claim.id %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-upload me-1"></i>
+                                Upload
+                            </a>
+                        </div>
+                        
+                        <div class="col-md-2 text-center">
+                            <div class="mb-3">
+                                <div class="btn btn-outline-light btn-lg rounded-circle" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-columns"></i>
+                                </div>
+                            </div>
+                            <h6 class="text-white">Column Mapping</h6>
+                            <p class="text-white-50 small">Map file columns to system fields</p>
+                            <a href="{% url 'claims:column_mapping' claim.id %}" class="btn btn-sm btn-success">
+                                <i class="fas fa-columns me-1"></i>
+                                Map
+                            </a>
+                        </div>
+                        
+                        <div class="col-md-2 text-center">
+                            <div class="mb-3">
+                                <div class="btn btn-outline-light btn-lg rounded-circle" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-cog"></i>
+                                </div>
+                            </div>
+                            <h6 class="text-white">Process Data</h6>
+                            <p class="text-white-50 small">Calculate R&D eligibility</p>
+                            <a href="{% url 'claims:process_claim' claim.id %}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-cog me-1"></i>
+                                Process
+                            </a>
+                        </div>
+                        
+                        <div class="col-md-2 text-center">
+                            <div class="mb-3">
+                                <div class="btn btn-outline-light btn-lg rounded-circle" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                            </div>
+                            <h6 class="text-white">View Results</h6>
+                            <p class="text-white-50 small">Review calculations and breakdowns</p>
+                            <a href="{% url 'claims:claim_results' claim.id %}" class="btn btn-sm btn-info">
+                                <i class="fas fa-chart-bar me-1"></i>
+                                Results
+                            </a>
+                        </div>
+                        
+                        <div class="col-md-2 text-center">
+                            <div class="mb-3">
+                                <div class="btn btn-outline-light btn-lg rounded-circle" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                            </div>
+                            <h6 class="text-white">Generate Narrative</h6>
+                            <p class="text-white-50 small">Create claim narrative</p>
+                            <a href="{% url 'claims:claim_narrative' claim.id %}" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-file-alt me-1"></i>
+                                Narrative
+                            </a>
+                        </div>
+                        
+                        <div class="col-md-2 text-center">
+                            <div class="mb-3">
+                                <div class="btn btn-outline-light btn-lg rounded-circle" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-download"></i>
+                                </div>
+                            </div>
+                            <h6 class="text-white">Export</h6>
+                            <p class="text-white-50 small">Export CT600L and reports</p>
+                            <a href="{% url 'claims:export_claim' claim.id %}" class="btn btn-sm btn-dark">
+                                <i class="fas fa-download me-1"></i>
+                                Export
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-dark">
+                <div class="card-header">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="fas fa-bolt me-2"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'claims:employee_list' claim.id %}" class="btn btn-outline-light w-100">
+                                <i class="fas fa-users me-2"></i>
+                                Manage Employees
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'claims:upload_data' claim.id %}" class="btn btn-outline-light w-100">
+                                <i class="fas fa-file-upload me-2"></i>
+                                Upload Files
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'claims:claim_results' claim.id %}" class="btn btn-outline-light w-100">
+                                <i class="fas fa-chart-line me-2"></i>
+                                View Analytics
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'claims:export_claim' claim.id %}" class="btn btn-outline-light w-100">
+                                <i class="fas fa-file-export me-2"></i>
+                                Export Reports
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-dark">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title text-white">Claim Not Found</h5>
+                    <p class="card-text text-white-50">
+                        The claim you're looking for doesn't exist or has been deleted.
+                    </p>
+                    <a href="{% url 'claims:claim_list' %}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Back to Claims
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

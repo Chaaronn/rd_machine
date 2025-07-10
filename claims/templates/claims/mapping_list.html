@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Column Mappings - R&D Machine{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2 text-white">
+                    <i class="fas fa-cogs me-2"></i>
+                    Column Mappings
+                </h1>
+                <a href="{% url 'claims:mapping_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    Create New Mapping
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            {% if mappings %}
+                <div class="card bg-dark">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-dark">
+                                <thead>
+                                    <tr>
+                                        <th class="text-white">Name</th>
+                                        <th class="text-white">System</th>
+                                        <th class="text-white">Columns Mapped</th>
+                                        <th class="text-white">Created</th>
+                                        <th class="text-white">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for mapping in mappings %}
+                                    <tr>
+                                        <td>
+                                            <strong class="text-white">{{ mapping.name }}</strong>
+                                            <br>
+                                            <small class="text-white-50">{{ mapping.description }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ mapping.system }}</span>
+                                        </td>
+                                        <td class="text-white">{{ mapping.column_count }}</td>
+                                        <td class="text-white">{{ mapping.created_at }}</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'claims:mapping_detail' mapping.id %}" class="btn btn-sm btn-outline-light">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'claims:mapping_update' mapping.id %}" class="btn btn-sm btn-outline-light">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'claims:mapping_delete' mapping.id %}" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="card bg-dark">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-cogs fa-3x text-white-50 mb-3"></i>
+                        <h5 class="card-title text-white">No Column Mappings Yet</h5>
+                        <p class="card-text text-white-50">
+                            You haven't created any column mappings yet. 
+                            Create mappings to streamline your data upload process.
+                        </p>
+                        <a href="{% url 'claims:mapping_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Create Your First Mapping
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if not mappings %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-dark">
+                <div class="card-header">
+                    <h6 class="card-title mb-0 text-white">
+                        <i class="fas fa-info-circle me-2"></i>
+                        About Column Mappings
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-white">Column mappings help you quickly map your file columns to R&D Machine fields. Once created, you can reuse them for similar files from the same accounting system.</p>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6 class="text-white"><i class="fas fa-save me-2 text-primary"></i>Save Time</h6>
+                            <p class="small text-white-50">Create once, use multiple times for similar file structures.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-white"><i class="fas fa-check me-2 text-success"></i>Consistency</h6>
+                            <p class="small text-white-50">Ensure consistent mapping across all your claims.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-white"><i class="fas fa-share me-2 text-info"></i>Share</h6>
+                            <p class="small text-white-50">Share mappings with your team members.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

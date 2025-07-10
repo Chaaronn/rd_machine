@@ -1,0 +1,236 @@
+# R&D Calculation Rules Configuration
+# This file contains configurable rules for R&D tax credit calculations
+
+# Basic R&D Calculation Rules
+calculation_rules:
+  # EPW (Externally Provided Workers) rules
+  epw:
+    cap_percentage: 0.65  # 65% cap on EPW costs
+    apply_to_connected: true
+    apply_to_unconnected: true
+    separate_calculation: true
+  
+  # National Insurance Contributions uplift
+  nic_uplift:
+    rate: 0.138  # 13.8% NIC rate
+    apply_to_staff_costs: true
+    apply_to_epw_costs: false
+  
+  # Default R&D percentages
+  default_rd_percentages:
+    staff: 0.8  # 80% default for staff
+    epw: 1.0    # 100% default for EPW
+    minimum: 0.0
+    maximum: 1.0
+
+# Cost Exclusion Rules
+exclusion_rules:
+  # Keywords that trigger automatic exclusion
+  excluded_keywords:
+    - "PILON"
+    - "Payment in lieu of notice"
+    - "Bonus"
+    - "Commission"
+    - "Maternity"
+    - "Paternity"
+    - "Sick pay"
+    - "Holiday pay"
+    - "Redundancy"
+    - "Termination"
+    - "Severance"
+    - "Ex-gratia"
+    - "Dividend"
+    - "Benefit in kind"
+    - "BIK"
+    - "Car allowance"
+    - "Pension"
+    - "Life insurance"
+    - "Private medical"
+    - "Intercompany"
+    - "Recharge"
+    - "Reimbursement"
+  
+  # Threshold-based exclusions
+  thresholds:
+    # Exclude unusually high single payments
+    high_payment_threshold: 50000
+    # Exclude very small payments that might be administrative
+    minimum_payment_threshold: 1
+  
+  # Pattern-based exclusions (regex patterns)
+  excluded_patterns:
+    - "^EX-.*"  # Codes starting with EX-
+    - ".*ADMIN.*"  # Administrative costs
+    - ".*FACILITY.*"  # Facility costs
+
+# Grant and Subsidy Rules
+grant_rules:
+  # Whether to automatically adjust for grants
+  auto_adjustment: true
+  # Types of grants to track
+  grant_types:
+    - "Innovation grant"
+    - "R&D grant"
+    - "Government subsidy"
+    - "EU funding"
+    - "Innovate UK"
+    - "HMRC advance"
+  
+  # Grant adjustment method
+  adjustment_method: "proportional"  # or "direct"
+
+# Employee Classification Rules
+employee_rules:
+  # Default classifications
+  default_classifications:
+    director: 0.5  # 50% R&D for directors
+    manager: 0.6   # 60% R&D for managers
+    developer: 0.9 # 90% R&D for developers
+    researcher: 0.95 # 95% R&D for researchers
+    admin: 0.0     # 0% R&D for admin staff
+    support: 0.2   # 20% R&D for support staff
+  
+  # EPW classification rules
+  epw_rules:
+    # Connected EPW rules
+    connected:
+      default_rd_percentage: 0.8
+      apply_65_percent_cap: true
+      requires_justification: true
+    
+    # Unconnected EPW rules
+    unconnected:
+      default_rd_percentage: 1.0
+      apply_65_percent_cap: true
+      requires_justification: false
+
+# Validation Rules
+validation_rules:
+  # Data quality checks
+  data_quality:
+    require_employee_name: true
+    require_cost_description: true
+    require_gross_cost: true
+    minimum_data_completeness: 0.9  # 90% of fields must be populated
+  
+  # Calculation validation
+  calculation_validation:
+    # Maximum total R&D percentage across all activities
+    max_total_rd_percentage: 1.0
+    # Minimum claim size
+    minimum_claim_amount: 1000
+    # Maximum single line item
+    maximum_line_item: 1000000
+  
+  # Consistency checks
+  consistency_checks:
+    # Check for duplicate entries
+    check_duplicates: true
+    # Check for unusual patterns
+    check_patterns: true
+    # Validate date ranges
+    validate_dates: true
+
+# Reporting Rules
+reporting_rules:
+  # CT600L specific rules
+  ct600l:
+    # Required fields for CT600L
+    required_fields:
+      - "total_rd_expenditure"
+      - "staff_costs"
+      - "epw_costs"
+      - "period_start"
+      - "period_end"
+    
+    # Rounding rules
+    rounding:
+      currency: 2  # Round to 2 decimal places
+      percentages: 3  # Round percentages to 3 decimal places
+  
+  # Audit trail requirements
+  audit_trail:
+    # Track all calculation steps
+    track_calculations: true
+    # Track all user decisions
+    track_decisions: true
+    # Track all exclusions
+    track_exclusions: true
+    # Retention period (days)
+    retention_period: 2555  # 7 years
+
+# Workflow Rules
+workflow_rules:
+  # Review requirements
+  review_requirements:
+    # Claims above this threshold require review
+    review_threshold: 100000
+    # Multiple reviewers required above this threshold
+    dual_review_threshold: 500000
+    # Automatic flags for review
+    auto_flags:
+      - "high_epw_percentage"
+      - "unusual_exclusions"
+      - "incomplete_data"
+      - "calculation_anomalies"
+  
+  # Approval workflow
+  approval_workflow:
+    # Require approval before export
+    require_approval: true
+    # Approval levels
+    approval_levels:
+      - name: "Consultant"
+        threshold: 50000
+      - name: "Manager"
+        threshold: 200000
+      - name: "Director"
+        threshold: 1000000
+
+# Integration Rules
+integration_rules:
+  # File format support
+  supported_formats:
+    - "xlsx"
+    - "csv"
+    - "xls"
+  
+  # Column mapping templates
+  mapping_templates:
+    xero:
+      employee_name: "Employee"
+      gross_cost: "Gross Pay"
+      description: "Description"
+      period: "Pay Period"
+    
+    sage:
+      employee_name: "Name"
+      gross_cost: "Amount"
+      description: "Details"
+      period: "Date"
+    
+    quickbooks:
+      employee_name: "Employee Name"
+      gross_cost: "Total Pay"
+      description: "Memo"
+      period: "Pay Date"
+
+# System Configuration
+system_config:
+  # Performance settings
+  performance:
+    max_file_size: 10485760  # 10MB
+    max_rows_per_file: 10000
+    processing_timeout: 300  # 5 minutes
+  
+  # Security settings
+  security:
+    require_authentication: true
+    session_timeout: 3600  # 1 hour
+    audit_all_actions: true
+  
+  # Backup settings
+  backup:
+    auto_backup: true
+    backup_frequency: 86400  # Daily
+    backup_retention: 2555  # 7 years in days 

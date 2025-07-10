@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Claims - R&D Machine{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2 text-white">
+                    <i class="fas fa-list me-2"></i>
+                    Your Claims
+                </h1>
+                <a href="{% url 'claims:claim_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    Create New Claim
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            {% if claims %}
+                <div class="row">
+                    {% for claim in claims %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 bg-dark">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="card-title mb-0 text-white">{{ claim.name }}</h6>
+                                <span class="badge {% if claim.status == 'completed' %}bg-success{% elif claim.status == 'in_review' %}bg-warning{% elif claim.status == 'approved' %}bg-info{% elif claim.status == 'submitted' %}bg-primary{% else %}bg-secondary{% endif %}">
+                                    {{ claim.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text text-white">
+                                    <strong>Company:</strong> {{ claim.company }}<br>
+                                    <strong>Period:</strong> {{ claim.accounting_period }}<br>
+                                    <strong>Description:</strong> {{ claim.description|truncatewords:10 }}
+                                </p>
+                                
+                                <div class="row text-center mb-3">
+                                    <div class="col-4">
+                                        <small class="text-white-50">Total Costs</small>
+                                        <div class="fw-bold text-white">£{{ claim.total_costs|floatformat:0 }}</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-white-50">Eligible</small>
+                                        <div class="fw-bold text-white">£{{ claim.eligible_costs|floatformat:0 }}</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-white-50">Credit</small>
+                                        <div class="fw-bold text-white">£{{ claim.credit_amount|floatformat:0 }}</div>
+                                    </div>
+                                </div>
+                                
+                                <small class="text-white-50">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    Created: {{ claim.created_at }}
+                                </small>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'claims:claim_detail' claim.pk %}" class="btn btn-sm btn-outline-light">
+                                        <i class="fas fa-eye me-1"></i>
+                                        View
+                                    </a>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'claims:upload_data' claim.pk %}" class="btn btn-sm btn-outline-light" title="Upload Data">
+                                            <i class="fas fa-upload"></i>
+                                        </a>
+                                        <a href="{% url 'claims:claim_results' claim.pk %}" class="btn btn-sm btn-outline-light" title="Results">
+                                            <i class="fas fa-chart-bar"></i>
+                                        </a>
+                                        <a href="{% url 'claims:export_claim' claim.pk %}" class="btn btn-sm btn-outline-light" title="Export">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Summary Statistics -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card bg-dark">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0 text-white">
+                                    <i class="fas fa-chart-pie me-2"></i>
+                                    Summary Statistics
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3">
+                                        <div class="border-end border-secondary">
+                                            <h4 class="text-white">{{ total_claims }}</h4>
+                                            <small class="text-white-50">Total Claims</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="border-end border-secondary">
+                                            <h4 class="text-white">{{ completed_claims }}</h4>
+                                            <small class="text-white-50">Completed</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="border-end border-secondary">
+                                            <h4 class="text-white">£{{ total_costs|floatformat:0 }}</h4>
+                                            <small class="text-white-50">Total Costs</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h4 class="text-white">£{{ total_credits|floatformat:0 }}</h4>
+                                        <small class="text-white-50">Total Credits</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="card bg-dark">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-file-alt fa-3x text-white-50 mb-3"></i>
+                        <h5 class="card-title text-white">No Claims Yet</h5>
+                        <p class="card-text text-white-50">
+                            You haven't created any R&D tax credit claims yet. 
+                            Get started by creating your first claim.
+                        </p>
+                        <a href="{% url 'claims:claim_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Create Your First Claim
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

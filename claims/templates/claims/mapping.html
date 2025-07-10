@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Column Mapping - R&D Machine{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'claims:claim_list' %}">Claims</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'claims:claim_detail' claim_id %}">Claim #{{ claim_id }}</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">Column Mapping</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="text-white">Column Mapping</h2>
+                <span class="badge bg-info">{{ uploaded_file.original_filename }}</span>
+            </div>
+            <p class="text-white">Map your file columns to the required R&D fields. This ensures accurate processing of your data.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card bg-dark">
+                <div class="card-header">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="fas fa-columns me-2"></i>
+                        Map Columns
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="mappingForm">
+                        {% csrf_token %}
+                        
+                        <div class="table-responsive">
+                            <table class="table table-striped table-dark">
+                                <thead>
+                                    <tr>
+                                        <th class="text-white">Required Field</th>
+                                        <th class="text-white">Your Column</th>
+                                        <th class="text-white">Sample Data</th>
+                                        <th class="text-white">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for field in required_fields %}
+                                    <tr>
+                                        <td>
+                                            <strong class="text-white">{{ field.label }}</strong>
+                                            <br>
+                                            <small class="text-white-50">{{ field.description }}</small>
+                                        </td>
+                                        <td>
+                                            <select class="form-select" name="mapping_{{ field.name }}" id="mapping_{{ field.name }}">
+                                                <option value="">-- Select Column --</option>
+                                                {% for column in file_columns %}
+                                                <option value="{{ column }}" {% if column == field.suggested_column %}selected{% endif %}>
+                                                    {{ column }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <div id="sample_{{ field.name }}" class="sample-data">
+                                                <small class="text-white-50">Select a column to see sample data</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-outline-light" 
+                                                    onclick="autoSuggest('{{ field.name }}')">
+                                                <i class="fas fa-magic"></i> Auto
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <h6 class="text-white">Optional Fields</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-dark">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-white">Optional Field</th>
+                                                <th class="text-white">Your Column</th>
+                                                <th class="text-white">Sample Data</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for field in optional_fields %}
+                                            <tr>
+                                                <td>
+                                                    <strong class="text-white">{{ field.label }}</strong>
+                                                    <br>
+                                                    <small class="text-white-50">{{ field.description }}</small>
+                                                </td>
+                                                <td>
+                                                    <select class="form-select form-select-sm" name="mapping_{{ field.name }}" id="mapping_{{ field.name }}">
+                                                        <option value="">-- Not Used --</option>
+                                                        {% for column in file_columns %}
+                                                        <option value="{{ column }}" {% if column == field.suggested_column %}selected{% endif %}>
+                                                            {{ column }}
+                                                        </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <div id="sample_{{ field.name }}" class="sample-data">
+                                                        <small class="text-white-50">Not mapped</small>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'claims:upload_data' claim.id %}" class="btn btn-outline-light me-md-2">
+                                Back to Upload
+                            </a>
+                            <button type="button" class="btn btn-outline-light me-md-2" onclick="saveMapping()">
+                                <i class="fas fa-save me-2"></i>
+                                Save Mapping
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-arrow-right me-2"></i>
+                                Continue to Processing
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-dark">
+                <div class="card-header">
+                    <h6 class="card-title mb-0 text-white">
+                        <i class="fas fa-info-circle me-2"></i>
+                        File Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4 text-white">File:</dt>
+                        <dd class="col-sm-8 text-white">{{ uploaded_file.original_filename }}</dd>
+                        
+                        <dt class="col-sm-4 text-white">Type:</dt>
+                        <dd class="col-sm-8 text-white">{{ uploaded_file.file_type|title }}</dd>
+                        
+                        <dt class="col-sm-4 text-white">Size:</dt>
+                        <dd class="col-sm-8 text-white">{{ uploaded_file.file_size|filesizeformat }}</dd>
+                        
+                        <dt class="col-sm-4 text-white">Rows:</dt>
+                        <dd class="col-sm-8 text-white">{{ row_count }}</dd>
+                        
+                        <dt class="col-sm-4 text-white">Columns:</dt>
+                        <dd class="col-sm-8 text-white">{{ file_columns|length }}</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card mt-4 bg-dark">
+                <div class="card-header">
+                    <h6 class="card-title mb-0 text-white">
+                        <i class="fas fa-template me-2"></i>
+                        Mapping Templates
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-white-50">Load pre-configured mappings for common accounting systems:</p>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-light btn-sm" onclick="loadTemplate('xero')">
+                            <i class="fas fa-download me-2"></i>
+                            Xero Template
+                        </button>
+                        <button type="button" class="btn btn-outline-light btn-sm" onclick="loadTemplate('sage')">
+                            <i class="fas fa-download me-2"></i>
+                            Sage Template
+                        </button>
+                        <button type="button" class="btn btn-outline-light btn-sm" onclick="loadTemplate('quickbooks')">
+                            <i class="fas fa-download me-2"></i>
+                            QuickBooks Template
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4 bg-dark">
+                <div class="card-header">
+                    <h6 class="card-title mb-0 text-white">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Mapping Progress
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3">
+                        <div class="progress-bar" role="progressbar" style="width: 0%" id="mappingProgress">
+                            0%
+                        </div>
+                    </div>
+                    <div id="mappingStatus">
+                        <p class="text-white-50">0 of {{ required_fields|length }} required fields mapped</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Sample data from the server
+const sampleData = {{ sample_data|safe }};
+
+// Mapping templates
+const mappingTemplates = {{ mapping_templates|safe }};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize mapping change handlers
+    document.querySelectorAll('select[name^="mapping_"]').forEach(select => {
+        select.addEventListener('change', function() {
+            updateSampleData(this);
+            updateMappingProgress();
+        });
+    });
+
+    // Initial progress update
+    updateMappingProgress();
+});
+
+function updateSampleData(selectElement) {
+    const fieldName = selectElement.name.replace('mapping_', '');
+    const columnName = selectElement.value;
+    const sampleDiv = document.getElementById(`sample_${fieldName}`);
+    
+    if (columnName && sampleData[columnName]) {
+        const samples = sampleData[columnName].slice(0, 3);
+        sampleDiv.innerHTML = samples.map(sample => 
+            `<small class="d-block text-truncate text-white">${sample}</small>`
+        ).join('');
+    } else {
+        sampleDiv.innerHTML = '<small class="text-white-50">No sample data</small>';
+    }
+}
+
+function updateMappingProgress() {
+    const requiredFields = {{ required_fields|length }};
+    const mappedFields = document.querySelectorAll('select[name^="mapping_"]').length;
+    let completedFields = 0;
+    
+         document.querySelectorAll('select[name^="mapping_"]').forEach(select => {
+         if (select.value && (select.name.includes('employee_name') || 
+             select.name.includes('gross_cost') || 
+             select.name.includes('description') || 
+             select.name.includes('period'))) {
+             completedFields++;
+         }
+     });
+    
+    const progress = Math.round((completedFields / requiredFields) * 100);
+    const progressBar = document.getElementById('mappingProgress');
+    const statusDiv = document.getElementById('mappingStatus');
+    
+    progressBar.style.width = `${progress}%`;
+    progressBar.textContent = `${progress}%`;
+    statusDiv.innerHTML = `<p class="text-white-50">${completedFields} of ${requiredFields} required fields mapped</p>`;
+    
+    if (progress === 100) {
+        progressBar.classList.add('bg-success');
+        statusDiv.innerHTML += '<p class="text-success"><i class="fas fa-check-circle me-2"></i>All required fields mapped</p>';
+    } else {
+        progressBar.classList.remove('bg-success');
+    }
+}
+
+function autoSuggest(fieldName) {
+    const select = document.getElementById(`mapping_${fieldName}`);
+    const options = select.querySelectorAll('option');
+    
+    // Simple auto-suggestion logic
+    const suggestions = {
+        'employee_name': ['name', 'employee', 'staff', 'worker'],
+        'gross_cost': ['amount', 'cost', 'pay', 'salary', 'gross'],
+        'description': ['description', 'desc', 'detail', 'memo'],
+        'period': ['date', 'period', 'month', 'year']
+    };
+    
+    const keywords = suggestions[fieldName] || [];
+    
+    for (let option of options) {
+        const columnName = option.value.toLowerCase();
+        if (keywords.some(keyword => columnName.includes(keyword))) {
+            select.value = option.value;
+            updateSampleData(select);
+            updateMappingProgress();
+            break;
+        }
+    }
+}
+
+function loadTemplate(templateName) {
+    const template = mappingTemplates[templateName];
+    if (!template) return;
+    
+    Object.entries(template).forEach(([field, column]) => {
+        const select = document.getElementById(`mapping_${field}`);
+        if (select) {
+            const option = Array.from(select.options).find(opt => opt.value === column);
+            if (option) {
+                select.value = column;
+                updateSampleData(select);
+            }
+        }
+    });
+    
+    updateMappingProgress();
+}
+
+function saveMapping() {
+    // Collect current mapping
+    const mapping = {};
+    document.querySelectorAll('select[name^="mapping_"]').forEach(select => {
+        if (select.value) {
+            const fieldName = select.name.replace('mapping_', '');
+            mapping[fieldName] = select.value;
+        }
+    });
+    
+    // Save mapping via AJAX
+    fetch(`{% url 'claims:save_mapping' claim.id %}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(mapping)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Mapping saved successfully!');
+        } else {
+            alert('Error saving mapping: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error saving mapping');
+    });
+}
+</script>
+{% endblock %} 

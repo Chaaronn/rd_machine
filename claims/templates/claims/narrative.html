@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+
+{% block title %}Narrative - R&D Machine{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'claims:claim_list' %}">Claims</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'claims:claim_detail' claim.id %}">{{ claim.name }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Narrative</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>R&D Claim Narrative</h2>
+                <span class="badge bg-info">{{ claim.name }}</span>
+            </div>
+            <p class="text-muted">Generate and customise your R&D claim narrative documentation.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <form method="post" id="narrativeForm">
+                {% csrf_token %}
+                
+                {% for section_id, section in narrative_template.items %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-edit me-2"></i>
+                            {{ section.title }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="{{ section_id }}_content" class="form-label">Content</label>
+                            <textarea class="form-control" id="{{ section_id }}_content" name="{{ section_id }}_content" rows="4">{{ section.content }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6>Guidance Questions:</h6>
+                            <ul class="list-unstyled">
+                                {% for question in section.questions %}
+                                <li class="mb-2">
+                                    <i class="fas fa-question-circle text-primary me-2"></i>
+                                    {{ question }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-file-signature me-2"></i>
+                            Additional Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="additional_notes" class="form-label">Additional Notes</label>
+                            <textarea class="form-control" id="additional_notes" name="additional_notes" rows="3" placeholder="Any additional information relevant to the R&D claim..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="prepared_by" class="form-label">Prepared By</label>
+                            <input type="text" class="form-control" id="prepared_by" name="prepared_by" value="{{ user.get_full_name|default:user.username }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="preparation_date" class="form-label">Preparation Date</label>
+                            <input type="date" class="form-control" id="preparation_date" name="preparation_date" value="{{ today|date:'Y-m-d' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a href="{% url 'claims:claim_results' claim.id %}" class="btn btn-outline-secondary me-md-2">
+                        Back to Results
+                    </a>
+                    <button type="button" class="btn btn-outline-primary me-md-2" onclick="saveNarrative()">
+                        <i class="fas fa-save me-2"></i>
+                        Save Draft
+                    </button>
+                    <button type="submit" name="action" value="generate" class="btn btn-primary">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Generate Document
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Claim Summary
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-6">Company:</dt>
+                        <dd class="col-sm-6">{{ claim.company_name|default:"N/A" }}</dd>
+                        
+                        <dt class="col-sm-6">Period:</dt>
+                        <dd class="col-sm-6">{{ claim.period_start|date:"M Y" }} - {{ claim.period_end|date:"M Y" }}</dd>
+                        
+                        <dt class="col-sm-6">Total R&D:</dt>
+                        <dd class="col-sm-6">£{{ results.total_qualifying_expenditure|floatformat:2 }}</dd>
+                        
+                        <dt class="col-sm-6">Staff Costs:</dt>
+                        <dd class="col-sm-6">£{{ results.staff_costs_with_nic|floatformat:2 }}</dd>
+                        
+                        <dt class="col-sm-6">EPW Costs:</dt>
+                        <dd class="col-sm-6">£{{ results.epw_costs|floatformat:2 }}</dd>
+                        
+                        <dt class="col-sm-6">Employees:</dt>
+                        <dd class="col-sm-6">{{ unique_employees }}</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Writing Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Be specific about technological advances sought
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Explain the uncertainties that existed
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Describe the systematic approach taken
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Justify employee R&D percentages
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Document the baseline of existing knowledge
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-download me-2"></i>
+                        Export Options
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportNarrative('word')">
+                            <i class="fas fa-file-word me-2"></i>
+                            Export to Word
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportNarrative('pdf')">
+                            <i class="fas fa-file-pdf me-2"></i>
+                            Export to PDF
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportNarrative('html')">
+                            <i class="fas fa-file-code me-2"></i>
+                            Export to HTML
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Auto-Save Status
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="autoSaveStatus" class="text-muted">
+                        <i class="fas fa-clock me-2"></i>
+                        Auto-save enabled
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-save functionality
+    let autoSaveTimer;
+    const autoSaveInterval = 30000; // 30 seconds
+    
+    function autoSave() {
+        const formData = new FormData(document.getElementById('narrativeForm'));
+        formData.append('action', 'auto_save');
+        
+        fetch('{% url "claims:save_narrative" claim.id %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('autoSaveStatus').innerHTML = 
+                    '<i class="fas fa-check text-success me-2"></i>Auto-saved at ' + new Date().toLocaleTimeString();
+            }
+        })
+        .catch(error => {
+            console.error('Auto-save failed:', error);
+            document.getElementById('autoSaveStatus').innerHTML = 
+                '<i class="fas fa-exclamation-triangle text-warning me-2"></i>Auto-save failed';
+        });
+    }
+    
+    // Set up auto-save timer
+    function resetAutoSaveTimer() {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(autoSave, autoSaveInterval);
+    }
+    
+    // Listen for form changes
+    document.getElementById('narrativeForm').addEventListener('input', resetAutoSaveTimer);
+    
+    // Initial auto-save timer
+    resetAutoSaveTimer();
+});
+
+function saveNarrative() {
+    const formData = new FormData(document.getElementById('narrativeForm'));
+    formData.append('action', 'save_draft');
+    
+    fetch('{% url "claims:save_narrative" claim.id %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Narrative saved successfully!');
+        } else {
+            alert('Error saving narrative: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error saving narrative');
+    });
+}
+
+function exportNarrative(format) {
+    const form = document.getElementById('narrativeForm');
+    const formData = new FormData(form);
+    formData.append('action', 'export');
+    formData.append('format', format);
+    
+    // Create a temporary form to submit for download
+    const tempForm = document.createElement('form');
+    tempForm.method = 'POST';
+    tempForm.action = '{% url "claims:export_narrative" claim.id %}';
+    tempForm.style.display = 'none';
+    
+    // Add CSRF token
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    tempForm.appendChild(csrfInput);
+    
+    // Add form data
+    for (let [key, value] of formData.entries()) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        tempForm.appendChild(input);
+    }
+    
+    document.body.appendChild(tempForm);
+    tempForm.submit();
+    document.body.removeChild(tempForm);
+}
+</script>
+{% endblock %} 

@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}R&D Machine - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-calculator me-3"></i>
+                    R&D Machine
+                </h1>
+                <p class="lead mb-4">
+                    Open-source R&D tax credit claim processing platform for UK R&D consultants.
+                    Making R&D claims transparent, efficient, and auditable.
+                </p>
+                <div class="d-flex gap-3">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'claims:claim_create' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-plus me-2"></i>
+                        Create New Claim
+                    </a>
+                    <a href="{% url 'claims:claim_list' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-list me-2"></i>
+                        View Claims
+                    </a>
+                    {% else %}
+                    <a href="{% url 'users:register' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Get Started
+                    </a>
+                    <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Login
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="hero-icon">
+                    <i class="fas fa-chart-line fa-10x text-light opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold mb-3 text-white">Why Choose R&D Machine?</h2>
+                <p class="lead text-white">
+                    Streamline your R&D tax credit claims with our comprehensive platform
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm bg-dark">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-upload fa-3x text-white"></i>
+                        </div>
+                        <h5 class="card-title text-white">Smart File Upload</h5>
+                        <p class="card-text text-white">
+                            Upload payroll and accounting files with intelligent column mapping
+                            and validation. Supports multiple formats including Excel, CSV, and more.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm bg-dark">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-calculator fa-3x text-white"></i>
+                        </div>
+                        <h5 class="card-title text-white">Automated Calculations</h5>
+                        <p class="card-text text-white">
+                            Comprehensive R&D calculation engine with EPW caps, NIC uplift,
+                            and automatic exclusion handling. Fully compliant with UK tax regulations.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm bg-dark">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-file-export fa-3x text-white"></i>
+                        </div>
+                        <h5 class="card-title text-white">CT600L Export</h5>
+                        <p class="card-text text-white">
+                            Generate CT600L forms automatically with detailed breakdowns,
+                            narratives, and audit trails. Export ready for HMRC submission.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+{% if user.is_authenticated %}
+<section class="py-5 bg-dark">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-12 mb-4">
+                <h3 class="fw-bold">Your Dashboard</h3>
+                <p class="text-muted">Quick overview of your R&D claims</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="fas fa-file-alt fa-2x text-primary mb-3"></i>
+                        <h4 class="fw-bold text-white">0</h4>
+                        <p class="text-white-50 mb-0">Total Claims</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-2x text-warning mb-3"></i>
+                        <h4 class="fw-bold text-white">0</h4>
+                        <p class="text-white-50 mb-0">In Progress</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fa-2x text-success mb-3"></i>
+                        <h4 class="fw-bold text-white">0</h4>
+                        <p class="text-white-50 mb-0">Completed</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="fas fa-pound-sign fa-2x text-info mb-3"></i>
+                        <h4 class="fw-bold text-white">£0</h4>
+                        <p class="text-white-50 mb-0">Total Credits</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- How It Works Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold mb-3">How It Works</h2>
+                <p class="lead text-muted">
+                    Simple 4-step process to generate your R&D tax credit claims
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3 text-center">
+                <div class="step-icon mb-3">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold fs-4">1</span>
+                    </div>
+                </div>
+                <h5 class="fw-bold">Upload Data</h5>
+                <p class="text-muted">
+                    Upload your payroll and accounting files. Our system supports various formats.
+                </p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="step-icon mb-3">
+                    <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold fs-4">2</span>
+                    </div>
+                </div>
+                <h5 class="fw-bold">Map Columns</h5>
+                <p class="text-muted">
+                    Intelligent column mapping with pre-configured templates for popular accounting systems.
+                </p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="step-icon mb-3">
+                    <div class="rounded-circle bg-warning text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold fs-4">3</span>
+                    </div>
+                </div>
+                <h5 class="fw-bold">Calculate</h5>
+                <p class="text-muted">
+                    Automated R&D calculations with EPW caps, NIC uplift, and exclusion handling.
+                </p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="step-icon mb-3">
+                    <div class="rounded-circle bg-info text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold fs-4">4</span>
+                    </div>
+                </div>
+                <h5 class="fw-bold">Export</h5>
+                <p class="text-muted">
+                    Generate CT600L forms, detailed reports, and audit trails ready for HMRC.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-3">Ready to Get Started?</h2>
+                <p class="lead mb-4">
+                    Join R&D consultants who are already using our platform to streamline their claims process.
+                </p>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'users:register' %}" class="btn btn-light btn-lg me-3">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Sign Up Free
+                </a>
+                <a href="#features" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Learn More
+                </a>
+                {% else %}
+                <a href="{% url 'claims:claim_create' %}" class="btn btn-light btn-lg">
+                    <i class="fas fa-plus me-2"></i>
+                    Create Your First Claim
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+    }
+    
+    .hero-icon {
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .step-icon {
+        position: relative;
+    }
+    
+    .step-icon::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 100%;
+        width: 50px;
+        height: 2px;
+        background: #dee2e6;
+        transform: translateY(-50%);
+        z-index: -1;
+    }
+    
+    .step-icon:last-child::after {
+        display: none;
+    }
+    
+    @media (max-width: 767px) {
+        .step-icon::after {
+            display: none;
+        }
+    }
+</style>
+{% endblock %} 

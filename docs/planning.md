@@ -35,7 +35,7 @@ Claimer.com — but open, advisor-friendly, and extensible.
     + Pre-save mapping templates for common formats (Xero, Sage, etc.)
     + Support merging multiple input sheets (payroll + timesheets + TB)
     + Regex or keyword-based auto-mapping suggestions
-        - Driven from the consultant side, 
+        - Driven from the consultant side
     + File version control — track changes across re-uploads
 
 * 3. User Roles & Collaboration
@@ -62,6 +62,8 @@ Claimer.com — but open, advisor-friendly, and extensible.
     + i.e., "detected recharge in balance_sheet.xlsx in sheet A on line X"
     + possibly using regex or fuzzy. 
         - both should allow consultant/reviewer to set specifics
+* Link to specific sections of CTA/DSIT/CIRD for reasoning
+    + i.e., on Unconnected EPW restriction, show CTA S1131 & CIRD84000 
 
 ## Structure
 

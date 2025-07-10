@@ -1,0 +1,428 @@
+{% extends 'base.html' %}
+
+{% block title %}Results - R&D Machine{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'claims:claim_list' %}">Claims</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'claims:claim_detail' claim.pk %}">{{ claim.name }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Results</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="text-white">R&D Calculation Results</h2>
+                <div>
+                    <span class="badge bg-info me-2">{{ claim.name }}</span>
+                    <span class="badge bg-success">{{ claim.status|title }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Total Costs</h6>
+                            <h3 class="mb-0">£{{ claim.total_costs|floatformat:0 }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calculator fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Eligible Costs</h6>
+                            <h3 class="mb-0">£{{ claim.eligible_costs|floatformat:0 }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">R&D Credit (26%)</h6>
+                            <h3 class="mb-0">£{{ claim.credit_amount|floatformat:0 }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-star fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Eligible %</h6>
+                            <h3 class="mb-0">{{ claim.get_eligible_percentage|floatformat:1 }}%</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-percent fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cost Categories Breakdown -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card bg-dark">
+                <div class="card-header">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="fas fa-table me-2"></i>
+                        Cost Categories Breakdown
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for category in cost_categories %}
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-white mb-0">
+                                <i class="fas fa-folder me-2"></i>
+                                <a href="{% url 'claims:cost_category_detail' claim.pk category.pk %}" class="text-white text-decoration-none">
+                                    {{ category.get_category_display }}
+                                    <i class="fas fa-external-link-alt ms-1 small"></i>
+                                </a>
+                            </h6>
+                            <div class="text-end">
+                                <small class="text-white-50">Total: £{{ category.total_cost|floatformat:0 }}</small><br>
+                                <small class="text-white-50">Eligible: £{{ category.eligible_cost|floatformat:0 }}</small>
+                            </div>
+                        </div>
+                        
+                        {% if category.description %}
+                        <p class="text-white-50 small mb-2">{{ category.description }}</p>
+                        {% endif %}
+                        
+                        {% if items_by_type.staff or items_by_type.epw or items_by_type.subcontractor or items_by_type.software or items_by_type.consumables or items_by_type.equipment or items_by_type.other %}
+                            {% if items_by_type.staff and category.category == 'staff' %}
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-white">Name</th>
+                                            <th class="text-white">Role/Service</th>
+                                            <th class="text-white">Gross Amount</th>
+                                            <th class="text-white">R&D %</th>
+                                            <th class="text-white">Calculated</th>
+                                            <th class="text-white">Eligible</th>
+                                            <th class="text-white">Status</th>
+                                            <th class="text-white">Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in items_by_type.staff %}
+                                        <tr class="{% if item.is_excluded %}table-warning{% endif %}">
+                                            <td class="text-white">{{ item.name }}</td>
+                                            <td class="text-white">{{ item.role|default:"-" }}</td>
+                                            <td class="text-white">£{{ item.gross_amount|floatformat:2 }}</td>
+                                            <td class="text-white">{{ item.r_and_d_percentage|floatformat:1 }}%</td>
+                                            <td class="text-white">£{{ item.gross_amount|floatformat:2 }}</td>
+                                            <td class="text-white">
+                                                {% if item.is_excluded %}
+                                                    <span class="text-muted">Excluded</span>
+                                                {% else %}
+                                                    £{{ item.eligible_amount|floatformat:2 }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if item.is_excluded %}
+                                                    <span class="badge bg-danger">Excluded</span>
+                                                    {% if item.exclusion_reason %}
+                                                        <i class="fas fa-info-circle ms-1 text-white-50" title="{{ item.exclusion_reason }}"></i>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-success">Included</span>
+                                                {% endif %}
+                                                
+                                                {% if item.grant_funded %}
+                                                    <span class="badge bg-secondary">Grant</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-white">{{ item.notes|default:"-" }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% elif items_by_type.epw and category.category == 'epw' %}
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-white">Name</th>
+                                            <th class="text-white">Role/Service</th>
+                                            <th class="text-white">Gross Amount</th>
+                                            <th class="text-white">R&D %</th>
+                                            <th class="text-white">Calculated</th>
+                                            <th class="text-white">Eligible</th>
+                                            <th class="text-white">Status</th>
+                                            <th class="text-white">Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in items_by_type.epw %}
+                                        <tr class="{% if item.is_excluded %}table-warning{% endif %}">
+                                            <td class="text-white">{{ item.name }}</td>
+                                            <td class="text-white">
+                                                {% if item.connected %}
+                                                    Connected EPW
+                                                {% else %}
+                                                    Unconnected EPW
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-white">£{{ item.gross_amount|floatformat:2 }}</td>
+                                            <td class="text-white">{{ item.r_and_d_percentage|floatformat:1 }}%</td>
+                                            <td class="text-white">£{{ item.gross_amount|floatformat:2 }}</td>
+                                            <td class="text-white">
+                                                {% if item.is_excluded %}
+                                                    <span class="text-muted">Excluded</span>
+                                                {% else %}
+                                                    £{{ item.eligible_amount|floatformat:2 }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if item.is_excluded %}
+                                                    <span class="badge bg-danger">Excluded</span>
+                                                    {% if item.exclusion_reason %}
+                                                        <i class="fas fa-info-circle ms-1 text-white-50" title="{{ item.exclusion_reason }}"></i>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-success">Included</span>
+                                                {% endif %}
+                                                
+                                                {% if item.connected %}
+                                                    <span class="badge bg-info">Connected</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">Unconnected EPW - 65% cap</span>
+                                                {% endif %}
+                                                
+                                                {% if item.grant_funded %}
+                                                    <span class="badge bg-secondary">Grant</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-white">{{ item.notes|default:"-" }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <!-- For other categories (subcontractor, software, consumables, equipment, other) -->
+                            {% for type_name, items in items_by_type.items %}
+                                {% if type_name == category.category %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-dark">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-white">Name</th>
+                                                <th class="text-white">Role/Service</th>
+                                                <th class="text-white">Gross Amount</th>
+                                                <th class="text-white">R&D %</th>
+                                                <th class="text-white">Calculated</th>
+                                                <th class="text-white">Eligible</th>
+                                                <th class="text-white">Status</th>
+                                                <th class="text-white">Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in items %}
+                                            <tr class="{% if item.is_excluded %}table-warning{% endif %}">
+                                                <td class="text-white">{{ item.name }}</td>
+                                                <td class="text-white">{{ item.role|default:"-" }}</td>
+                                                <td class="text-white">£{{ item.gross_amount|floatformat:2 }}</td>
+                                                <td class="text-white">{{ item.r_and_d_percentage|floatformat:1 }}%</td>
+                                                <td class="text-white">£{{ item.gross_amount|floatformat:2 }}</td>
+                                                <td class="text-white">
+                                                    {% if item.is_excluded %}
+                                                        <span class="text-muted">Excluded</span>
+                                                    {% else %}
+                                                        £{{ item.eligible_amount|floatformat:2 }}
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if item.is_excluded %}
+                                                        <span class="badge bg-danger">Excluded</span>
+                                                        {% if item.exclusion_reason %}
+                                                            <i class="fas fa-info-circle ms-1 text-white-50" title="{{ item.exclusion_reason }}"></i>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="badge bg-success">Included</span>
+                                                    {% endif %}
+                                                    
+                                                    {% if item.type == 'subcontractor' %}
+                                                        {% if item.connected %}
+                                                            <span class="badge bg-info">Connected</span>
+                                                        {% else %}
+                                                            <span class="badge bg-warning">Unconnected</span>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                    
+                                                    {% if item.grant_funded %}
+                                                        <span class="badge bg-secondary">Grant</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-white">{{ item.notes|default:"-" }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                        {% else %}
+                        <div class="text-center py-3">
+                            <small class="text-white-50">No line items in this category</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-folder-open fa-3x text-white-50 mb-3"></i>
+                        <h6 class="text-white">No Cost Categories</h6>
+                        <p class="text-white-50">No cost categories have been created for this claim yet.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Credit Calculation -->
+            <div class="card bg-dark mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0 text-white">
+                        <i class="fas fa-calculator me-2"></i>
+                        Credit Calculation
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-8 text-white">Total Costs:</dt>
+                        <dd class="col-sm-4 text-white">£{{ claim.total_costs|floatformat:0 }}</dd>
+                        
+                        <dt class="col-sm-8 text-white">Eligible Costs:</dt>
+                        <dd class="col-sm-4 text-white">£{{ claim.eligible_costs|floatformat:0 }}</dd>
+                        
+                        <dt class="col-sm-8 text-white">Credit Rate:</dt>
+                        <dd class="col-sm-4 text-white">26%</dd>
+                        
+                        <dt class="col-sm-8 text-white"><strong>R&D Credit:</strong></dt>
+                        <dd class="col-sm-4 text-white"><strong>£{{ claim.credit_amount|floatformat:0 }}</strong></dd>
+                    </dl>
+                    
+                    <div class="progress mt-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ claim.get_eligible_percentage }}%">
+                            {{ claim.get_eligible_percentage|floatformat:1 }}% Eligible
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Options -->
+            <div class="card bg-dark mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0 text-white">
+                        <i class="fas fa-download me-2"></i>
+                        Export Options
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'claims:export_claim' claim.pk %}?format=ct600l" class="btn btn-outline-light">
+                            <i class="fas fa-file-excel me-2"></i>
+                            Export CT600L Summary
+                        </a>
+                        <a href="{% url 'claims:export_claim' claim.pk %}?format=detailed" class="btn btn-outline-light">
+                            <i class="fas fa-table me-2"></i>
+                            Export Detailed Breakdown
+                        </a>
+                        <a href="{% url 'claims:claim_narrative' claim.pk %}" class="btn btn-outline-light">
+                            <i class="fas fa-file-alt me-2"></i>
+                            View Narrative
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Summary -->
+            <div class="card bg-dark">
+                <div class="card-header">
+                    <h6 class="card-title mb-0 text-white">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Category Summary
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for category in cost_categories %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-white">{{ category.get_category_display }}</span>
+                        <div class="text-end">
+                            <small class="text-white-50">£{{ category.eligible_cost|floatformat:0 }}</small>
+                            <div class="small text-white-50">{{ category.get_eligible_percentage|floatformat:1 }}%</div>
+                        </div>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar" role="progressbar" style="width: {{ category.get_eligible_percentage }}%"></div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="{% url 'claims:column_mapping' claim.pk %}" class="btn btn-outline-light">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Back to Mapping
+                    </a>
+                </div>
+                <div>
+                    <a href="{% url 'claims:claim_detail' claim.pk %}" class="btn btn-outline-light me-2">
+                        <i class="fas fa-eye me-2"></i>
+                        View Claim Details
+                    </a>
+                    <a href="{% url 'claims:export_claim' claim.pk %}" class="btn btn-success">
+                        <i class="fas fa-check me-2"></i>
+                        Finalise & Export
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
