@@ -1,0 +1,409 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Add Line Item</h1>
+                <a href="{% url 'claims:line_item_list' claim_id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Line Items
+                </a>
+            </div>
+
+            <!-- Error Messages -->
+            {% if errors %}
+            <div class="alert alert-danger">
+                <h6 class="alert-heading">Please fix the following errors:</h6>
+                <ul class="mb-0">
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="card bg-dark">
+                <div class="card-body text-white">
+                    <form method="post" id="lineItemForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Basic Information -->
+                            <div class="col-md-6">
+                                <h5 class="card-title text-white">Basic Information</h5>
+                                
+                                <div class="form-group">
+                                    <label for="type">Category Type *</label>
+                                    <select class="form-control" id="type" name="type" required>
+                                        <option value="">Select category type</option>
+                                        {% for type_code, type_name in category_choices %}
+                                            <option value="{{ type_code }}" 
+                                                    {% if form_data.type == type_code or category_type == type_code %}selected{% endif %}>
+                                                {{ type_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="name">Name *</label>
+                                    <input type="text" class="form-control" id="name" name="name" 
+                                           placeholder="Individual or supplier name" required
+                                           value="{{ form_data.name|default:'' }}">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="company_name">Company Name</label>
+                                    <input type="text" class="form-control" id="company_name" name="company_name" 
+                                           placeholder="Company name (for EPWs/subcontractors)"
+                                           value="{{ form_data.company_name|default:'' }}">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="role">Role/Description</label>
+                                    <input type="text" class="form-control" id="role" name="role" 
+                                           placeholder="Job title, function, or service description"
+                                           value="{{ form_data.role|default:'' }}">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="cost_date">Cost Date</label>
+                                    <input type="date" class="form-control" id="cost_date" name="cost_date"
+                                           value="{{ form_data.cost_date|default:'' }}">
+                                    <small class="form-text text-white-50">Date when the cost was incurred (for period-specific calculations)</small>
+                                </div>
+                                
+                                {% if category_config %}
+                                <div class="alert alert-info">
+                                    <h6 class="alert-heading">{{ category_config.display_name }}</h6>
+                                    <p class="mb-0">{{ category_config.description }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Financial Information -->
+                            <div class="col-md-6">
+                                <h5 class="card-title text-white">Financial Information</h5>
+                                
+                                <div class="form-group">
+                                    <label for="gross_amount">Gross Amount *</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">£</span>
+                                        </div>
+                                        <input type="number" class="form-control" id="gross_amount" name="gross_amount" 
+                                               step="0.01" min="0" placeholder="0.00" required
+                                               value="{{ form_data.gross_amount|default:'' }}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="r_and_d_percentage">R&D Percentage *</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="r_and_d_percentage" name="r_and_d_percentage" 
+                                               step="0.01" min="0" max="100" value="{{ form_data.r_and_d_percentage|default:'100' }}" required>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-white-50">Percentage of time/cost attributable to R&D activities</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="r_and_d_activity">R&D Activity Description</label>
+                                    <textarea class="form-control" id="r_and_d_activity" name="r_and_d_activity" rows="3" 
+                                              placeholder="Description of R&D work performed">{{ form_data.r_and_d_activity|default:'' }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Additional Options -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="card-title text-white">Additional Options</h5>
+                                
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" class="form-check-input" id="connected" name="connected"
+                                           {% if form_data.connected %}checked{% endif %}>
+                                    <label class="form-check-label text-white" for="connected">
+                                        Connected Person
+                                    </label>
+                                    <small class="form-text text-white-50">Check if this is a connected person (e.g., director, shareholder)</small>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" class="form-check-input" id="grant_funded" name="grant_funded"
+                                           {% if form_data.grant_funded %}checked{% endif %}>
+                                    <label class="form-check-label text-white" for="grant_funded">
+                                        Grant Funded
+                                    </label>
+                                    <small class="form-text text-white-50">Check if this cost is funded by a grant or subsidy</small>
+                                </div>
+
+                                <div class="form-group" id="grant_source_group" style="display: none;">
+                                    <label for="grant_source">Grant Source</label>
+                                    <input type="text" class="form-control" id="grant_source" name="grant_source" 
+                                           placeholder="Source of grant funding"
+                                           value="{{ form_data.grant_source|default:'' }}">
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" class="form-check-input" id="is_excluded" name="is_excluded"
+                                           {% if form_data.is_excluded %}checked{% endif %}>
+                                    <label class="form-check-label text-white" for="is_excluded">
+                                        Exclude from R&D Calculation
+                                    </label>
+                                    <small class="form-text text-white-50">Check if this item should be excluded from R&D calculations</small>
+                                </div>
+
+                                <div class="form-group" id="exclusion_reason_group" style="display: none;">
+                                    <label for="exclusion_reason">Exclusion Reason</label>
+                                    <input type="text" class="form-control" id="exclusion_reason" name="exclusion_reason" 
+                                           placeholder="Reason for exclusion (e.g., PILON, Bonus, Insufficient evidence)"
+                                           value="{{ form_data.exclusion_reason|default:'' }}">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="card-title text-white">Notes</h5>
+                                
+                                <div class="form-group">
+                                    <label for="notes">Additional Notes</label>
+                                    <textarea class="form-control" id="notes" name="notes" rows="6" 
+                                              placeholder="Any additional notes or comments about this line item">{{ form_data.notes|default:'' }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="text-right">
+                            <a href="{% url 'claims:line_item_list' claim_id %}" class="btn btn-secondary">Cancel</a>
+                            <button type="button" class="btn btn-warning" id="saveDraftBtn">Save Draft</button>
+                            <button type="submit" class="btn btn-primary">Add Line Item</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation and auto-save functionality
+let autoSaveTimer;
+let formData = {};
+
+// Initialize form data from existing values
+function initializeFormData() {
+    const form = document.getElementById('lineItemForm');
+    const formElements = form.elements;
+    
+    for (let element of formElements) {
+        if (element.name && element.type !== 'submit' && element.type !== 'button') {
+            if (element.type === 'checkbox') {
+                formData[element.name] = element.checked;
+            } else {
+                formData[element.name] = element.value;
+            }
+        }
+    }
+}
+
+// Auto-save form data to localStorage
+function saveFormData() {
+    const form = document.getElementById('lineItemForm');
+    const formElements = form.elements;
+    
+    for (let element of formElements) {
+        if (element.name && element.type !== 'submit' && element.type !== 'button') {
+            if (element.type === 'checkbox') {
+                formData[element.name] = element.checked;
+            } else {
+                formData[element.name] = element.value;
+            }
+        }
+    }
+    
+    localStorage.setItem('lineItemFormData', JSON.stringify(formData));
+    console.log('Form data saved to draft');
+}
+
+// Load form data from localStorage
+function loadFormData() {
+    const savedData = localStorage.getItem('lineItemFormData');
+    if (savedData) {
+        try {
+            const data = JSON.parse(savedData);
+            const form = document.getElementById('lineItemForm');
+            
+            for (let key in data) {
+                const element = form.elements[key];
+                if (element) {
+                    if (element.type === 'checkbox') {
+                        element.checked = data[key];
+                    } else {
+                        element.value = data[key];
+                    }
+                }
+            }
+            
+            // Update dependent fields
+            updateDependentFields();
+            console.log('Form data loaded from draft');
+        } catch (e) {
+            console.error('Error loading form data:', e);
+        }
+    }
+}
+
+// Clear saved form data
+function clearFormData() {
+    localStorage.removeItem('lineItemFormData');
+    console.log('Form data cleared');
+}
+
+// Update dependent fields based on checkbox states
+function updateDependentFields() {
+    const grantFunded = document.getElementById('grant_funded');
+    const grantSourceGroup = document.getElementById('grant_source_group');
+    const isExcluded = document.getElementById('is_excluded');
+    const exclusionReasonGroup = document.getElementById('exclusion_reason_group');
+    
+    grantSourceGroup.style.display = grantFunded.checked ? 'block' : 'none';
+    exclusionReasonGroup.style.display = isExcluded.checked ? 'block' : 'none';
+}
+
+// Client-side validation
+function validateForm() {
+    const errors = [];
+    
+    // Required fields
+    const name = document.getElementById('name').value.trim();
+    const type = document.getElementById('type').value;
+    const grossAmount = document.getElementById('gross_amount').value;
+    const rAndDPercentage = document.getElementById('r_and_d_percentage').value;
+    
+    if (!name) {
+        errors.push('Name is required.');
+    }
+    
+    if (!type) {
+        errors.push('Category type is required.');
+    }
+    
+    if (!grossAmount || parseFloat(grossAmount) <= 0) {
+        errors.push('Gross amount must be a positive number.');
+    }
+    
+    if (!rAndDPercentage || parseFloat(rAndDPercentage) < 0 || parseFloat(rAndDPercentage) > 100) {
+        errors.push('R&D percentage must be between 0 and 100.');
+    }
+    
+    return errors;
+}
+
+// Show validation errors
+function showErrors(errors) {
+    // Remove existing error alert
+    const existingAlert = document.querySelector('.alert-danger');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    if (errors.length > 0) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger';
+        alertDiv.innerHTML = `
+            <h6 class="alert-heading">Please fix the following errors:</h6>
+            <ul class="mb-0">
+                ${errors.map(error => `<li>${error}</li>`).join('')}
+            </ul>
+        `;
+        
+        const container = document.querySelector('.container');
+        const title = container.querySelector('h1');
+        title.parentNode.insertBefore(alertDiv, title.nextSibling);
+        
+        return false;
+    }
+    
+    return true;
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    initializeFormData();
+    loadFormData();
+    updateDependentFields();
+    
+    // Auto-save on form changes
+    const form = document.getElementById('lineItemForm');
+    form.addEventListener('input', function() {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(saveFormData, 2000); // Save after 2 seconds of inactivity
+    });
+    
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        const errors = validateForm();
+        if (!showErrors(errors)) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Clear saved data on successful submission
+        clearFormData();
+    });
+    
+    // Save draft button
+    document.getElementById('saveDraftBtn').addEventListener('click', function() {
+        saveFormData();
+        alert('Draft saved! You can continue editing or come back later.');
+    });
+});
+
+// Show/hide grant source field based on grant funded checkbox
+document.getElementById('grant_funded').addEventListener('change', function() {
+    const grantSourceGroup = document.getElementById('grant_source_group');
+    grantSourceGroup.style.display = this.checked ? 'block' : 'none';
+    saveFormData();
+});
+
+// Show/hide exclusion reason field based on is excluded checkbox
+document.getElementById('is_excluded').addEventListener('change', function() {
+    const exclusionReasonGroup = document.getElementById('exclusion_reason_group');
+    exclusionReasonGroup.style.display = this.checked ? 'block' : 'none';
+    saveFormData();
+});
+
+// Update form fields based on category type selection
+document.getElementById('type').addEventListener('change', function() {
+    const categoryType = this.value;
+    
+    // Show company name field for EPW and subcontractor
+    const companyNameField = document.getElementById('company_name').closest('.form-group');
+    if (categoryType === 'epw' || categoryType === 'subcontractor') {
+        companyNameField.style.display = 'block';
+    } else {
+        companyNameField.style.display = 'none';
+    }
+    
+    // Show connected field for EPW and subcontractor
+    const connectedField = document.getElementById('connected').closest('.form-check');
+    if (categoryType === 'epw' || categoryType === 'subcontractor') {
+        connectedField.style.display = 'block';
+    } else {
+        connectedField.style.display = 'none';
+    }
+    
+    saveFormData();
+});
+</script>
+{% endblock %} 

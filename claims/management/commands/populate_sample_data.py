@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, date
 
 from claims.models import (
     Claim, CostCategory, CostLineItem, GrantOrSubsidy, 
@@ -66,7 +66,8 @@ class Command(BaseCommand):
         claim1 = Claim.objects.create(
             name='ABC Ltd R&D Claim 2023-24',
             company='ABC Ltd',
-            accounting_period='2023-2024',
+            accounting_period_start=date(2023, 4, 1),
+            accounting_period_end=date(2024, 3, 31),
             description='Software development and AI research projects focusing on machine learning algorithms and data processing systems.',
             status='in_review',
             created_by=user,
@@ -109,6 +110,7 @@ class Command(BaseCommand):
             r_and_d_activity='Leading AI algorithms development and machine learning model training',
             gross_amount=Decimal('45000.00'),
             r_and_d_percentage=Decimal('80.00'),
+            cost_date=date(2023, 6, 15),
             notes='Lead developer on AI algorithms',
             uploaded_by=user
         )
@@ -118,9 +120,10 @@ class Command(BaseCommand):
             type='staff',
             name='Sarah Johnson',
             role='Data Scientist',
-            r_and_d_activity='Full-time machine learning research and model optimization',
+            r_and_d_activity='Full-time machine learning research and model optimisation',
             gross_amount=Decimal('30000.00'),
             r_and_d_percentage=Decimal('100.00'),
+            cost_date=date(2023, 7, 1),
             notes='Full-time on machine learning research',
             uploaded_by=user
         )
@@ -129,10 +132,12 @@ class Command(BaseCommand):
             claim=claim1,
             type='software',
             name='AWS Cloud Services',
+            company_name='Amazon Web Services',
             role='Cloud Computing',
             r_and_d_activity='Machine learning model training and data processing infrastructure',
             gross_amount=Decimal('15000.00'),
             r_and_d_percentage=Decimal('90.00'),
+            cost_date=date(2023, 8, 1),
             notes='GPU instances for model training',
             uploaded_by=user
         )
@@ -141,11 +146,13 @@ class Command(BaseCommand):
             claim=claim1,
             type='software',
             name='TensorFlow Enterprise',
+            company_name='Google',
             role='ML Framework',
             r_and_d_activity='Deep learning model development and training',
             gross_amount=Decimal('10000.00'),
             r_and_d_percentage=Decimal('100.00'),
-            notes='Enterprise ML framework license',
+            cost_date=date(2023, 9, 1),
+            notes='Enterprise ML framework licence',
             uploaded_by=user
         )
         
@@ -166,7 +173,8 @@ class Command(BaseCommand):
         claim2 = Claim.objects.create(
             name='XYZ Corp R&D Claim 2023-24',
             company='XYZ Corp',
-            accounting_period='2023-2024',
+            accounting_period_start=date(2023, 4, 1),
+            accounting_period_end=date(2024, 3, 31),
             description='Medical device development and testing for innovative cardiac monitoring systems.',
             status='completed',
             created_by=user,
@@ -186,7 +194,7 @@ class Command(BaseCommand):
         
         equipment_category2 = CostCategory.objects.create(
             claim=claim2,
-            category='equipment',
+            category='other',
             total_cost=Decimal('75000.00'),
             eligible_cost=Decimal('37500.00'),
             description='Medical testing equipment and devices'
@@ -209,6 +217,7 @@ class Command(BaseCommand):
             r_and_d_activity='Leading medical device research and clinical trial design',
             gross_amount=Decimal('80000.00'),
             r_and_d_percentage=Decimal('75.00'),
+            cost_date=date(2023, 5, 1),
             notes='Leading medical device research',
             uploaded_by=user
         )
@@ -221,6 +230,7 @@ class Command(BaseCommand):
             r_and_d_activity='Device design, prototyping, and testing protocols',
             gross_amount=Decimal('50000.00'),
             r_and_d_percentage=Decimal('90.00'),
+            cost_date=date(2023, 6, 1),
             notes='Device design and testing',
             uploaded_by=user
         )
@@ -233,6 +243,7 @@ class Command(BaseCommand):
             r_and_d_activity='Laboratory testing, data collection, and analysis',
             gross_amount=Decimal('20000.00'),
             r_and_d_percentage=Decimal('100.00'),
+            cost_date=date(2023, 7, 1),
             notes='Laboratory testing and data collection',
             uploaded_by=user
         )
@@ -248,6 +259,7 @@ class Command(BaseCommand):
             gross_amount=Decimal('25000.00'),
             r_and_d_percentage=Decimal('70.00'),
             connected=True,  # Connected subcontractor
+            cost_date=date(2023, 8, 15),
             notes='FDA approval process guidance',
             uploaded_by=user
         )
@@ -256,7 +268,8 @@ class Command(BaseCommand):
         claim3 = Claim.objects.create(
             name='Tech Solutions R&D Claim 2023-24',
             company='Tech Solutions Ltd',
-            accounting_period='2023-2024',
+            accounting_period_start=date(2023, 4, 1),
+            accounting_period_end=date(2024, 3, 31),
             description='Renewable energy research and development of advanced solar panel technology.',
             status='draft',
             created_by=user,
@@ -299,6 +312,7 @@ class Command(BaseCommand):
             r_and_d_activity='Solar panel efficiency research and photovoltaic cell development',
             gross_amount=Decimal('35000.00'),
             r_and_d_percentage=Decimal('80.00'),
+            cost_date=date(2023, 6, 1),
             notes='Leading solar technology research',
             uploaded_by=user
         )
@@ -314,6 +328,7 @@ class Command(BaseCommand):
             gross_amount=Decimal('15000.00'),
             r_and_d_percentage=Decimal('100.00'),
             connected=True,  # Connected EPW - no cap
+            cost_date=date(2023, 7, 1),
             notes='Connected EPW - no cap applied',
             uploaded_by=user
         )
@@ -329,6 +344,7 @@ class Command(BaseCommand):
             gross_amount=Decimal('15000.00'),
             r_and_d_percentage=Decimal('80.00'),
             connected=False,  # Unconnected EPW - 65% cap applies
+            cost_date=date(2023, 8, 1),
             notes='Unconnected EPW - 65% cap applied',
             uploaded_by=user
         )
@@ -341,6 +357,7 @@ class Command(BaseCommand):
             r_and_d_activity='Solar panel testing and analysis materials',
             gross_amount=Decimal('10000.00'),
             r_and_d_percentage=Decimal('100.00'),
+            cost_date=date(2023, 9, 1),
             notes='Silicon wafers, testing equipment, chemicals',
             uploaded_by=user
         )

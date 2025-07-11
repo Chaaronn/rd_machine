@@ -24,10 +24,13 @@ urlpatterns = [
     # Cost category detail view
     path('<uuid:claim_id>/category/<uuid:category_id>/', views.cost_category_detail, name='cost_category_detail'),
     
-    # Employee management
-    path('<uuid:claim_id>/employees/', views.employee_list, name='employee_list'),
-    path('<uuid:claim_id>/employees/add/', views.employee_add, name='employee_add'),
-    path('<uuid:claim_id>/employees/<uuid:employee_id>/edit/', views.employee_edit, name='employee_edit'),
+    # Generic line item management
+    path('<uuid:claim_id>/items/', views.line_item_list, name='line_item_list'),
+    path('<uuid:claim_id>/items/<str:category_type>/', views.line_item_list, name='line_item_list_by_category'),
+    path('<uuid:claim_id>/items/add/', views.line_item_add, name='line_item_add'),
+    path('<uuid:claim_id>/items/add/<str:category_type>/', views.line_item_add, name='line_item_add_by_category'),
+    path('<uuid:claim_id>/items/<uuid:item_id>/edit/', views.line_item_edit, name='line_item_edit'),
+    path('<uuid:claim_id>/items/<uuid:item_id>/delete/', views.line_item_delete, name='line_item_delete'),
     
     # Mapping templates (these might still use integer IDs if they're not UUIDs)
     path('mappings/', views.mapping_list, name='mapping_list'),

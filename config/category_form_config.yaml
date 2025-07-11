@@ -1,0 +1,362 @@
+# Category Form Configuration
+# This file defines which fields appear in the line item forms for each category type
+# Users can edit this file to customise their form layouts
+
+categories:
+  staff:
+    display_name: "Staff"
+    description: "Employee costs including salaries, benefits, and related expenses"
+    required_fields:
+      - name
+      - gross_amount
+      - r_and_d_percentage
+      - r_and_d_activity
+    optional_fields:
+      - role
+      - cost_date
+      - connected
+      - grant_funded
+      - grant_source
+      - is_excluded
+      - exclusion_reason
+      - notes
+    field_labels:
+      name: "Employee Name"
+      role: "Job Title"
+      gross_amount: "Gross Salary"
+      r_and_d_percentage: "R&D Time %"
+      r_and_d_activity: "R&D Activities"
+      cost_date: "Employment Date"
+      connected: "Connected Person"
+      grant_funded: "Grant Funded"
+      grant_source: "Grant Source"
+      is_excluded: "Exclude from R&D"
+      exclusion_reason: "Exclusion Reason"
+      notes: "Additional Notes"
+    field_help:
+      name: "Full name of the employee"
+      role: "Job title or position (e.g., Senior Developer, Research Scientist)"
+      gross_amount: "Total gross salary including benefits"
+      r_and_d_percentage: "Percentage of time spent on R&D activities"
+      r_and_d_activity: "Description of R&D work performed by this employee"
+      cost_date: "Date when employment started (for period-specific calculations)"
+      connected: "Check if this is a director, shareholder, or connected person"
+      grant_funded: "Check if this cost is funded by a grant or subsidy"
+      grant_source: "Source of grant funding (e.g., Innovate UK, Research Council)"
+      is_excluded: "Check if this item should be excluded from R&D calculations"
+      exclusion_reason: "Reason for exclusion (e.g., PILON, Bonus, Insufficient evidence)"
+      notes: "Any additional notes or comments about this employee"
+
+  epw:
+    display_name: "Externally Provided Worker"
+    description: "External workers provided by third-party companies"
+    required_fields:
+      - name
+      - company_name
+      - gross_amount
+      - r_and_d_percentage
+      - r_and_d_activity
+      - connected
+    optional_fields:
+      - role
+      - cost_date
+      - grant_funded
+      - grant_source
+      - is_excluded
+      - exclusion_reason
+      - notes
+    field_labels:
+      name: "Worker Name"
+      company_name: "Provider Company"
+      role: "Service Description"
+      gross_amount: "Service Cost"
+      r_and_d_percentage: "R&D Time %"
+      r_and_d_activity: "R&D Activities"
+      cost_date: "Service Date"
+      connected: "Connected Provider"
+      grant_funded: "Grant Funded"
+      grant_source: "Grant Source"
+      is_excluded: "Exclude from R&D"
+      exclusion_reason: "Exclusion Reason"
+      notes: "Additional Notes"
+    field_help:
+      name: "Name of the external worker"
+      company_name: "Name of the company providing the worker"
+      role: "Description of services provided"
+      gross_amount: "Total cost of the service"
+      r_and_d_percentage: "Percentage of time spent on R&D activities"
+      r_and_d_activity: "Description of R&D work performed"
+      cost_date: "Date when service was provided"
+      connected: "Check if the provider is connected (affects EPW restrictions)"
+      grant_funded: "Check if this cost is funded by a grant or subsidy"
+      grant_source: "Source of grant funding"
+      is_excluded: "Check if this item should be excluded from R&D calculations"
+      exclusion_reason: "Reason for exclusion"
+      notes: "Any additional notes about this service"
+
+  subcontractor:
+    display_name: "Subcontractor"
+    description: "External companies providing specialist services"
+    required_fields:
+      - name
+      - company_name
+      - gross_amount
+      - r_and_d_percentage
+      - r_and_d_activity
+      - connected
+    optional_fields:
+      - role
+      - cost_date
+      - grant_funded
+      - grant_source
+      - is_excluded
+      - exclusion_reason
+      - notes
+    field_labels:
+      name: "Subcontractor Name"
+      company_name: "Company Name"
+      role: "Service Description"
+      gross_amount: "Service Cost"
+      r_and_d_percentage: "R&D Time %"
+      r_and_d_activity: "R&D Activities"
+      cost_date: "Service Date"
+      connected: "Connected Subcontractor"
+      grant_funded: "Grant Funded"
+      grant_source: "Grant Source"
+      is_excluded: "Exclude from R&D"
+      exclusion_reason: "Exclusion Reason"
+      notes: "Additional Notes"
+    field_help:
+      name: "Name of the subcontractor"
+      company_name: "Name of the subcontractor company"
+      role: "Description of services provided"
+      gross_amount: "Total cost of the service"
+      r_and_d_percentage: "Percentage of time spent on R&D activities"
+      r_and_d_activity: "Description of R&D work performed"
+      cost_date: "Date when service was provided"
+      connected: "Check if the subcontractor is connected"
+      grant_funded: "Check if this cost is funded by a grant or subsidy"
+      grant_source: "Source of grant funding"
+      is_excluded: "Check if this item should be excluded from R&D calculations"
+      exclusion_reason: "Reason for exclusion"
+      notes: "Any additional notes about this service"
+
+  software:
+    display_name: "Software"
+    description: "Software licences, development tools, and cloud services"
+    required_fields:
+      - name
+      - gross_amount
+      - r_and_d_percentage
+      - r_and_d_activity
+    optional_fields:
+      - company_name
+      - role
+      - cost_date
+      - grant_funded
+      - grant_source
+      - is_excluded
+      - exclusion_reason
+      - notes
+    field_labels:
+      name: "Software Name"
+      company_name: "Software Provider"
+      role: "Software Type"
+      gross_amount: "Licence Cost"
+      r_and_d_percentage: "R&D Usage %"
+      r_and_d_activity: "R&D Activities"
+      cost_date: "Purchase Date"
+      grant_funded: "Grant Funded"
+      grant_source: "Grant Source"
+      is_excluded: "Exclude from R&D"
+      exclusion_reason: "Exclusion Reason"
+      notes: "Additional Notes"
+    field_help:
+      name: "Name of the software or service"
+      company_name: "Name of the software provider (e.g., Microsoft, AWS)"
+      role: "Type of software (e.g., Development Tool, Cloud Service, Database)"
+      gross_amount: "Total cost of the software licence or service"
+      r_and_d_percentage: "Percentage of usage for R&D activities"
+      r_and_d_activity: "Description of how the software is used for R&D"
+      cost_date: "Date when software was purchased or service started"
+      grant_funded: "Check if this cost is funded by a grant or subsidy"
+      grant_source: "Source of grant funding"
+      is_excluded: "Check if this item should be excluded from R&D calculations"
+      exclusion_reason: "Reason for exclusion"
+      notes: "Any additional notes about this software"
+
+  cloud:
+    display_name: "Cloud Services"
+    description: "Cloud computing services and infrastructure"
+    required_fields:
+      - name
+      - gross_amount
+      - r_and_d_percentage
+      - r_and_d_activity
+    optional_fields:
+      - company_name
+      - role
+      - cost_date
+      - grant_funded
+      - grant_source
+      - is_excluded
+      - exclusion_reason
+      - notes
+    field_labels:
+      name: "Service Name"
+      company_name: "Cloud Provider"
+      role: "Service Type"
+      gross_amount: "Service Cost"
+      r_and_d_percentage: "R&D Usage %"
+      r_and_d_activity: "R&D Activities"
+      cost_date: "Service Date"
+      grant_funded: "Grant Funded"
+      grant_source: "Grant Source"
+      is_excluded: "Exclude from R&D"
+      exclusion_reason: "Exclusion Reason"
+      notes: "Additional Notes"
+    field_help:
+      name: "Name of the cloud service"
+      company_name: "Name of the cloud provider (e.g., AWS, Azure, Google Cloud)"
+      role: "Type of service (e.g., Compute, Storage, Database, AI/ML)"
+      gross_amount: "Total cost of the cloud service"
+      r_and_d_percentage: "Percentage of usage for R&D activities"
+      r_and_d_activity: "Description of how the service is used for R&D"
+      cost_date: "Date when service was used"
+      grant_funded: "Check if this cost is funded by a grant or subsidy"
+      grant_source: "Source of grant funding"
+      is_excluded: "Check if this item should be excluded from R&D calculations"
+      exclusion_reason: "Reason for exclusion"
+      notes: "Any additional notes about this service"
+
+  consumables:
+    display_name: "Consumables"
+    description: "Materials, supplies, and consumable items used in R&D"
+    required_fields:
+      - name
+      - gross_amount
+      - r_and_d_percentage
+      - r_and_d_activity
+    optional_fields:
+      - company_name
+      - role
+      - cost_date
+      - grant_funded
+      - grant_source
+      - is_excluded
+      - exclusion_reason
+      - notes
+    field_labels:
+      name: "Item Name"
+      company_name: "Supplier"
+      role: "Item Type"
+      gross_amount: "Item Cost"
+      r_and_d_percentage: "R&D Usage %"
+      r_and_d_activity: "R&D Activities"
+      cost_date: "Purchase Date"
+      grant_funded: "Grant Funded"
+      grant_source: "Grant Source"
+      is_excluded: "Exclude from R&D"
+      exclusion_reason: "Exclusion Reason"
+      notes: "Additional Notes"
+    field_help:
+      name: "Name of the consumable item"
+      company_name: "Name of the supplier"
+      role: "Type of item (e.g., Chemicals, Components, Testing Materials)"
+      gross_amount: "Total cost of the consumable items"
+      r_and_d_percentage: "Percentage of usage for R&D activities"
+      r_and_d_activity: "Description of how the items are used for R&D"
+      cost_date: "Date when items were purchased"
+      grant_funded: "Check if this cost is funded by a grant or subsidy"
+      grant_source: "Source of grant funding"
+      is_excluded: "Check if this item should be excluded from R&D calculations"
+      exclusion_reason: "Reason for exclusion"
+      notes: "Any additional notes about these items"
+
+  equipment:
+    display_name: "Equipment"
+    description: "Capital equipment and machinery used in R&D"
+    required_fields:
+      - name
+      - gross_amount
+      - r_and_d_percentage
+      - r_and_d_activity
+    optional_fields:
+      - company_name
+      - role
+      - cost_date
+      - grant_funded
+      - grant_source
+      - is_excluded
+      - exclusion_reason
+      - notes
+    field_labels:
+      name: "Equipment Name"
+      company_name: "Manufacturer"
+      role: "Equipment Type"
+      gross_amount: "Equipment Cost"
+      r_and_d_percentage: "R&D Usage %"
+      r_and_d_activity: "R&D Activities"
+      cost_date: "Purchase Date"
+      grant_funded: "Grant Funded"
+      grant_source: "Grant Source"
+      is_excluded: "Exclude from R&D"
+      exclusion_reason: "Exclusion Reason"
+      notes: "Additional Notes"
+    field_help:
+      name: "Name of the equipment"
+      company_name: "Name of the equipment manufacturer"
+      role: "Type of equipment (e.g., Testing Equipment, Prototyping Tools)"
+      gross_amount: "Total cost of the equipment"
+      r_and_d_percentage: "Percentage of usage for R&D activities"
+      r_and_d_activity: "Description of how the equipment is used for R&D"
+      cost_date: "Date when equipment was purchased"
+      grant_funded: "Check if this cost is funded by a grant or subsidy"
+      grant_source: "Source of grant funding"
+      is_excluded: "Check if this item should be excluded from R&D calculations"
+      exclusion_reason: "Reason for exclusion"
+      notes: "Any additional notes about this equipment"
+
+  other:
+    display_name: "Other"
+    description: "Other costs not covered by other categories"
+    required_fields:
+      - name
+      - gross_amount
+      - r_and_d_percentage
+      - r_and_d_activity
+    optional_fields:
+      - company_name
+      - role
+      - cost_date
+      - grant_funded
+      - grant_source
+      - is_excluded
+      - exclusion_reason
+      - notes
+    field_labels:
+      name: "Item Name"
+      company_name: "Supplier"
+      role: "Item Type"
+      gross_amount: "Item Cost"
+      r_and_d_percentage: "R&D Usage %"
+      r_and_d_activity: "R&D Activities"
+      cost_date: "Purchase Date"
+      grant_funded: "Grant Funded"
+      grant_source: "Grant Source"
+      is_excluded: "Exclude from R&D"
+      exclusion_reason: "Exclusion Reason"
+      notes: "Additional Notes"
+    field_help:
+      name: "Name of the item or service"
+      company_name: "Name of the supplier or provider"
+      role: "Type of item or service"
+      gross_amount: "Total cost of the item or service"
+      r_and_d_percentage: "Percentage of usage for R&D activities"
+      r_and_d_activity: "Description of how the item is used for R&D"
+      cost_date: "Date when item was purchased or service provided"
+      grant_funded: "Check if this cost is funded by a grant or subsidy"
+      grant_source: "Source of grant funding"
+      is_excluded: "Check if this item should be excluded from R&D calculations"
+      exclusion_reason: "Reason for exclusion"
+      notes: "Any additional notes about this item" 

@@ -234,7 +234,15 @@ def column_mapping(request, claim_id):
         messages.success(request, 'Column mapping saved successfully!')
         return redirect('claims:claim_results', claim_id=claim_id)
     
-    # Mock data for demonstration - in real implementation, this would analyze the uploaded file
+    # Mock data for demonstration 
+    # TODO: Add analysis of the uploaded file to extract the correct columns
+    # TODO: Drive all of this from yaml
+    # Would need a yaml for each cost category, and then a mapping for the file type
+    # The yaml would be used to display the required fields and optional fields per cost category
+    # i.e., if the file is tagged "staffing_costs", we look-up the yaml for this category 
+    # This should also be able to be configured by the user, so they can add their own categories
+    # And saved to a new mapping template
+
     required_fields = [
         {'name': 'employee_name', 'label': 'Employee Name', 'description': 'Full name of employee'},
         {'name': 'gross_cost', 'label': 'Gross Cost', 'description': 'Gross cost amount'},
@@ -267,6 +275,11 @@ def process_claim(request, claim_id):
     claim = get_object_or_404(Claim, pk=claim_id, created_by=request.user)
     
     if request.method == 'POST':
+        # TODO: All of this lol, again from editable yamls
+        # TODO: Add calculation of total QE, additional deduction, etc
+        # TODO: Add calculation of total credit
+        # TODO: Add handling of SME/RDEC
+
         # Update claim status
         claim.status = 'submitted'
         claim.save()
@@ -359,6 +372,7 @@ def employee_list(request, claim_id):
     """List employees for a specific claim"""
     claim = get_object_or_404(Claim, pk=claim_id, created_by=request.user)
     
+    # TODO: This should be in reference to the consultant
     # Get all staff line items
     line_items = claim.line_items.filter(type='staff').order_by('name')
     
@@ -374,6 +388,9 @@ def employee_list(request, claim_id):
 def employee_add(request, claim_id):
     """Add employee to a claim"""
     claim = get_object_or_404(Claim, pk=claim_id, created_by=request.user)
+
+    # TODO: This should be in reference to the consultant
+    # TODO: Make a new method for this to add an item to any cost category
     
     if request.method == 'POST':
         # This would create a new cost line item for the employee
@@ -390,6 +407,10 @@ def employee_add(request, claim_id):
 @login_required
 def employee_edit(request, claim_id, employee_id):
     """Edit employee information"""
+
+    # TODO: Again, just make this in reference to the consultant
+    # TODO: Make a new method for this to edit an item to any cost category
+    
     claim = get_object_or_404(Claim, pk=claim_id, created_by=request.user)
     line_item = get_object_or_404(CostLineItem, pk=employee_id, claim=claim)
     

@@ -136,8 +136,7 @@ class CostCategory(models.Model):
         ('epw', 'Externally Provided Workers'),
         ('software', 'Software Costs'),
         ('consumables', 'Consumables'),
-        ('equipment', 'Equipment'),
-        ('other', 'Other Costs'),
+        ('other', 'Other Costs'),               # This is placeholder, probs replace with cloud etc
     ]
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -218,6 +217,9 @@ class CostLineItem(models.Model):
 
     
     # Financial fields
+
+    # TODO: Make this a bit more dynamic, based on the cost category
+
     gross_amount = models.DecimalField(
         max_digits=12, 
         decimal_places=2,
@@ -276,6 +278,7 @@ class CostLineItem(models.Model):
             base_amount = (self.gross_amount * self.r_and_d_percentage) / 100
             
             # Apply EPW 65% cap for unconnected EPWs
+            # TODO: Move this to a config file, just in case it changes in future
             if self.type == 'epw' and not self.connected:
                 self.eligible_amount = base_amount * Decimal('0.65')
                 if 'epw_capped' not in self.tags:
@@ -360,6 +363,9 @@ class GrantOrSubsidy(models.Model):
 
 class NarrativeSection(models.Model):
     """Narrative responses for claims"""
+
+    # TODO: Add multiple projects 
+    # TODO: Add project weightings for AIF
     
     QUESTION_CHOICES = [
         ('scientific_advance', 'What scientific advance was sought?'),
