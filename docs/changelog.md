@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - Initial Project Setup
 
-## [1.1.0] - 2025-07-15 
+## [0.1.0] - 2025-07-15 
 
 ### Added
 - **Line item editing system**: Comprehensive line item editing functionality
