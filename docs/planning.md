@@ -202,6 +202,15 @@ This is similar for EPWs.
 
 <img width="1405" height="930" alt="image" src="https://github.com/user-attachments/assets/e3cb0cb3-2b3e-4400-91c9-36de9f74b4b7" />
 
+Available fields are driven from a YAML to make it easily editable for non-technical users:
+
+<img width="609" height="863" alt="image" src="https://github.com/user-attachments/assets/8427f669-7598-4bed-bc03-c9c63d6fc5d3" />
+
+Eventually, we'll set-up some common mappings like Xero automatically for each category, as they're mostly the same every time:
+
+<img width="439" height="306" alt="image" src="https://github.com/user-attachments/assets/57b7695e-14e4-4731-b244-aa940fb0dbf5" />
+
+
 ### Post-Upload
 
 <img width="1424" height="865" alt="image" src="https://github.com/user-attachments/assets/e541f417-8595-4de4-aa97-b946f4c81ddc" />
