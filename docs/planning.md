@@ -13,7 +13,9 @@ Claimer.com — but open, advisor-friendly, and extensible.
 ## Goals
 
 * Enable users to upload financial data (payroll, trial balance, etc.)
+      + Completed
 * Let users define column mappings and inclusion/exclusion logic
+      + Completed
 * Automatically calculate qualifying R&D expenditure
 * Provide clear exportable outputs for CT600L and claim documentation
 * Allow configuration of claim logic (e.g. via YAML or web UI)
@@ -182,3 +184,33 @@ This is similar for EPWs.
 * User sets default R&D % or per-person value
 * System processes and shows results
 * User downloads summary or CT600L-ready table
+
+
+# Prelim Screenshots
+
+## Claim management 
+
+### Overview 
+
+<img width="1380" height="923" alt="image" src="https://github.com/user-attachments/assets/8168d2d0-9554-4256-b91c-7c799d8b11ad" />
+
+### Claim view 
+
+<img width="1335" height="901" alt="image" src="https://github.com/user-attachments/assets/31386eea-36e8-4c9b-b95a-19228cac3c51" />
+
+### Data upload 
+
+<img width="1405" height="930" alt="image" src="https://github.com/user-attachments/assets/e3cb0cb3-2b3e-4400-91c9-36de9f74b4b7" />
+
+### Post-Upload
+
+<img width="1424" height="865" alt="image" src="https://github.com/user-attachments/assets/e541f417-8595-4de4-aa97-b946f4c81ddc" />
+
+### Detailed view of cost category
+
+<img width="1434" height="928" alt="image" src="https://github.com/user-attachments/assets/23c51d25-745f-467f-8514-55b3b8115d53" />
+
+### Editing a specific line-item
+
+<img width="923" height="876" alt="image" src="https://github.com/user-attachments/assets/0de31627-bfe6-4fe9-b06a-7a35c95eab56" />
+
