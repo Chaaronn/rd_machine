@@ -53,7 +53,7 @@ exclusion_rules:
   # Threshold-based exclusions
   thresholds:
     # Exclude unusually high single payments
-    high_payment_threshold: 50000
+    high_payment_threshold: 500000
     # Exclude very small payments that might be administrative
     minimum_payment_threshold: 1
   
@@ -80,27 +80,16 @@ grant_rules:
   adjustment_method: "proportional"  # or "direct"
 
 # Employee Classification Rules
-employee_rules:
-  # Default classifications
-  default_classifications:
-    director: 0.5  # 50% R&D for directors
-    manager: 0.6   # 60% R&D for managers
-    developer: 0.9 # 90% R&D for developers
-    researcher: 0.95 # 95% R&D for researchers
-    admin: 0.0     # 0% R&D for admin staff
-    support: 0.2   # 20% R&D for support staff
-  
+employee_rules:  
   # EPW classification rules
   epw_rules:
     # Connected EPW rules
     connected:
-      default_rd_percentage: 0.8
       apply_65_percent_cap: true
       requires_justification: true
     
     # Unconnected EPW rules
     unconnected:
-      default_rd_percentage: 1.0
       apply_65_percent_cap: true
       requires_justification: false
 
@@ -120,7 +109,7 @@ validation_rules:
     # Minimum claim size
     minimum_claim_amount: 1000
     # Maximum single line item
-    maximum_line_item: 1000000
+    maximum_line_item: 100000000
   
   # Consistency checks
   consistency_checks:

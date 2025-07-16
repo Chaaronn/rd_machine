@@ -41,4 +41,7 @@ urlpatterns = [
     
     # AJAX endpoint for saving mappings
     path('<uuid:claim_id>/save_mapping/', views.save_mapping, name='save_mapping'),
+    
+    # Debug endpoints
+    path('<uuid:claim_id>/debug-line-items/', views.debug_line_items, name='debug_line_items'),
 ] 

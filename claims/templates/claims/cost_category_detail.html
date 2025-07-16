@@ -72,7 +72,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-warning text-white">
+            <div class="card bg-dark text-white">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
@@ -121,6 +121,134 @@
                     </div>
                     {% endif %}
 
+                    {% if raw_data_by_employee %}
+                    <!-- Raw Data by Employee -->
+                    {% for employee_name, employee_data in raw_data_by_employee.items %}
+                    <div class="employee-section mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-white mb-0">
+                                <i class="fas fa-user me-2"></i>
+                                {{ employee_name }}
+                                <small class="text-white-50 ms-2">({{ employee_data.period_count }} periods)</small>
+                            </h6>
+                            <div class="text-end">
+                                <small class="text-white-50">
+                                    Total Qualifying: £{{ employee_data.totals.qualifying_amount|floatformat:2 }}
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-dark table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th class="text-white">Date</th>
+                                        <th class="text-white">Gross</th>
+                                        <th class="text-white">ER NI</th>
+                                        <th class="text-white">ER Pension</th>
+                                        <th class="text-white">Bonus</th>
+                                        <th class="text-white">PILON</th>
+                                        <th class="text-white">R&D %</th>
+                                        <th class="text-white">Qualifying Base</th>
+                                        <th class="text-white">Qualifying Amount</th>
+                                        <th class="text-white">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for period in employee_data.periods %}
+                                    <tr>
+                                        <td class="text-white">{{ period.date }}</td>
+                                        <td class="text-white">£{{ period.gross|floatformat:2 }}</td>
+                                        <td class="text-white">£{{ period.er_ni|floatformat:2 }}</td>
+                                        <td class="text-white">£{{ period.er_pen|floatformat:2 }}</td>
+                                        <td class="text-white">
+                                            {% if period.bonus > 0 %}
+                                                <span class="text-danger">£{{ period.bonus|floatformat:2 }}</span>
+                                                <small class="text-white-50">(excluded)</small>
+                                            {% else %}
+                                                £0.00
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-white">
+                                            {% if period.pilon > 0 %}
+                                                <span class="text-danger">£{{ period.pilon|floatformat:2 }}</span>
+                                                <small class="text-white-50">(excluded)</small>
+                                            {% else %}
+                                                £0.00
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-white">{{ period.rd_percentage|floatformat:1 }}%</td>
+                                        <td class="text-white">£{{ period.qualifying_base|floatformat:2 }}</td>
+                                        <td class="text-white"><strong>£{{ period.qualifying_amount|floatformat:2 }}</strong></td>
+                                        <td class="text-white">
+                                            <a href="{% url 'claims:line_item_edit' claim.pk employee_data.line_item.pk %}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Edit {{ employee_name }}">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    
+                                    <!-- Employee totals row -->
+                                    <tr class="table-secondary">
+                                        <td class="text-dark"><strong>TOTAL</strong></td>
+                                        <td class="text-dark"><strong>£{{ employee_data.totals.gross|floatformat:2 }}</strong></td>
+                                        <td class="text-dark"><strong>£{{ employee_data.totals.er_ni|floatformat:2 }}</strong></td>
+                                        <td class="text-dark"><strong>£{{ employee_data.totals.er_pen|floatformat:2 }}</strong></td>
+                                        <td class="text-dark">
+                                            {% if employee_data.totals.bonus > 0 %}
+                                                <strong class="text-danger">£{{ employee_data.totals.bonus|floatformat:2 }}</strong>
+                                            {% else %}
+                                                <strong>£0.00</strong>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-dark">
+                                            {% if employee_data.totals.pilon > 0 %}
+                                                <strong class="text-danger">£{{ employee_data.totals.pilon|floatformat:2 }}</strong>
+                                            {% else %}
+                                                <strong>£0.00</strong>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-dark">{{ employee_data.line_item.r_and_d_percentage|floatformat:1 }}%</td>
+                                        <td class="text-dark"><strong>£{{ employee_data.totals.qualifying_base|floatformat:2 }}</strong></td>
+                                        <td class="text-dark"><strong>£{{ employee_data.totals.qualifying_amount|floatformat:2 }}</strong></td>
+                                        <td class="text-dark">
+                                            <a href="{% url 'claims:line_item_edit' claim.pk employee_data.line_item.pk %}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Edit {{ employee_name }}">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Employee status badges -->
+                        <div class="mt-2">
+                            {% if employee_data.line_item.is_excluded %}
+                                <span class="badge bg-danger">Excluded</span>
+                            {% else %}
+                                <span class="badge bg-success">Included</span>
+                            {% endif %}
+                            
+                            {% if employee_data.line_item.type == 'epw' %}
+                                {% if employee_data.line_item.connected %}
+                                    <span class="badge bg-info">Connected EPW</span>
+                                {% else %}
+                                    <span class="badge bg-dark">Unconnected EPW - 65% cap</span>
+                                {% endif %}
+                            {% endif %}
+                            
+                            {% if employee_data.line_item.grant_funded %}
+                                <span class="badge bg-secondary">Grant</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <!-- Fallback to aggregated data if raw data not available -->
                     <div class="table-responsive">
                         <table class="table table-dark table-striped">
                             <thead>
@@ -138,7 +266,7 @@
                             </thead>
                             <tbody>
                                 {% for item in line_items %}
-                                <tr class="{% if item.is_excluded %}table-warning{% endif %}">
+                                <tr class="{% if item.is_excluded %}table-dark{% endif %}">
                                     <td class="text-white">
                                         <strong>{{ item.name }}</strong>
                                         {% if item.type == 'epw' %}
@@ -181,7 +309,7 @@
                                             {% if item.connected %}
                                                 <span class="badge bg-info">Connected EPW</span>
                                             {% else %}
-                                                <span class="badge bg-warning">Unconnected EPW - 65% cap</span>
+                                                <span class="badge bg-dark">Unconnected EPW - 65% cap</span>
                                             {% endif %}
                                         {% endif %}
                                         
@@ -197,7 +325,7 @@
                                             </span>
                                         {% endif %}
                                         {% if item.exclusion_reason %}
-                                            <br><small class="text-warning">
+                                            <br><small class="text-light">
                                                 <i class="fas fa-exclamation-triangle me-1"></i>
                                                 {{ item.exclusion_reason }}
                                             </small>
@@ -229,6 +357,7 @@
                             </tbody>
                         </table>
                     </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -242,7 +371,7 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-warning">
+                    <div class="alert alert-secondary">
                         <i class="fas fa-info-circle me-2"></i>
                         <strong>EPW Rules:</strong> Unconnected EPWs are subject to a 65% cap on qualifying expenditure.
                         Connected EPWs have no restriction.
@@ -268,7 +397,7 @@
                                         {% if calc.item.connected %}
                                             <span class="badge bg-success">{{ calc.connection_status }}</span>
                                         {% else %}
-                                            <span class="badge bg-warning">{{ calc.connection_status }}</span>
+                                            <span class="badge bg-dark">{{ calc.connection_status }}</span>
                                         {% endif %}
                                     </td>
                                     <td class="text-white">£{{ calc.original_amount|floatformat:2 }}</td>
@@ -362,7 +491,7 @@
                         <div class="step mb-3">
                             <div class="d-flex justify-content-between">
                                 <span class="text-white">Less: EPW Restrictions:</span>
-                                <span class="text-warning">
+                                <span class="text-light">
                                     {% for calc in epw_calculations %}
                                         {% if calc.restriction_applied %}
                                             -£{{ calc.reduction_amount|floatformat:2 }}

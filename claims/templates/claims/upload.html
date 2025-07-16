@@ -23,7 +23,7 @@
                 <h2>Upload Financial Data</h2>
                 <span class="badge bg-info">Claim #{{ claim_id }}</span>
             </div>
-            <p class="text-muted">Upload your payroll, trial balance, or timesheet data to begin processing your R&D claim.</p>
+            <p class="text-muted">Upload your cost data by category to begin processing your R&D claim. Select the appropriate cost category for your data.</p>
         </div>
     </div>
 
@@ -54,30 +54,34 @@
                         {% csrf_token %}
                         
                         <div class="mb-3">
-                            <label for="file_type" class="form-label">File Type</label>
+                            <label for="file_type" class="form-label">Cost Category</label>
                             <select class="form-select" id="file_type" name="file_type" required>
-                                <option value="">Select file type...</option>
-                                <option value="payroll">Payroll Data</option>
-                                <option value="trial_balance">Trial Balance</option>
-                                <option value="timesheet">Timesheet Data</option>
-                                <option value="invoice">Invoice Data</option>
-                                <option value="other">Other</option>
+                                <option value="">Select cost category...</option>
+                                <option value="staff">Staff</option>
+                                <option value="subcontractor">Subcontractors</option>
+                                <option value="epw">EPWs (Externally Provided Workers)</option>
+                                <option value="software">Software</option>
+                                <option value="cloud">Cloud Compute</option>
+                                <option value="consumables">Consumables</option>
                             </select>
                             <div class="form-text">
-                                <strong>File Type Guidelines:</strong>
+                                <strong>Cost Category Guidelines:</strong>
                                 <ul class="mt-2 mb-0">
-                                    <li><strong>Payroll Data:</strong> Employee names, gross pay, descriptions, periods</li>
-                                    <li><strong>Trial Balance:</strong> Account codes, descriptions, debit/credit amounts</li>
-                                    <li><strong>Timesheet Data:</strong> Employee names, hours worked, project codes</li>
+                                    <li><strong>Staff:</strong> Employee payroll data including names, gross pay, ER NI, ER Pension, bonuses</li>
+                                    <li><strong>Subcontractors:</strong> Third-party contractor invoices and payments</li>
+                                    <li><strong>EPWs:</strong> Externally provided workers (consultants, agency staff)</li>
+                                    <li><strong>Software:</strong> Software licenses, subscriptions, and tools</li>
+                                    <li><strong>Cloud Compute:</strong> Cloud services, hosting, and computing resources</li>
+                                    <li><strong>Consumables:</strong> Materials, supplies, and consumable items</li>
                                 </ul>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label for="data_file" class="form-label">Upload File</label>
-                            <input type="file" class="form-control" id="data_file" name="data_file" accept=".xlsx,.xls,.csv" required>
+                            <input type="file" class="form-control" id="data_file" name="data_file" accept=".xlsx,.csv" required>
                             <div class="form-text">
-                                Supported formats: Excel (.xlsx, .xls), CSV (.csv). Maximum file size: 10MB.
+                                Supported formats: Excel (.xlsx), CSV (.csv). Maximum file size: 10MB.
                             </div>
                         </div>
 
@@ -175,12 +179,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            const allowedTypes = ['.xlsx', '.csv', '.xls'];
+            const allowedTypes = ['.xlsx', '.csv'];
             const fileName = file.name.toLowerCase();
             const isValidType = allowedTypes.some(type => fileName.endsWith(type));
             
             if (file && !isValidType) {
-                alert('Please upload a valid file format: Excel (.xlsx, .xls) or CSV (.csv)');
+                alert('Please upload a valid file format: Excel (.xlsx) or CSV (.csv)');
                 fileInput.value = '';
                 return;
             }

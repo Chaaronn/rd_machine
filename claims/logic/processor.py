@@ -51,12 +51,37 @@ class RDProcessor:
             True if successful, False otherwise
         """
         try:
-            if file_path.endswith('.xlsx'):
-                self.data = pd.read_excel(file_path)
-            elif file_path.endswith('.csv'):
-                self.data = pd.read_csv(file_path)
+            import os
+            
+            # Validate file exists and is readable
+            if not os.path.exists(file_path):
+                raise FileNotFoundError(f"File not found: {file_path}")
+            
+            # Check file size
+            file_size = os.path.getsize(file_path)
+            if file_size == 0:
+                raise ValueError("File is empty")
+            
+            # Try to read the file based on extension
+            if file_path.lower().endswith('.xlsx'):
+                try:
+                    self.data = pd.read_excel(file_path, engine='openpyxl')
+                except Exception as excel_error:
+                    if "not a zip file" in str(excel_error).lower():
+                        raise ValueError("File appears to be corrupted or not a valid Excel file. Please check the file format.")
+                    else:
+                        raise ValueError(f"Cannot read Excel file: {excel_error}")
+            elif file_path.lower().endswith('.csv'):
+                try:
+                    self.data = pd.read_csv(file_path)
+                except Exception as csv_error:
+                    # Try different encodings for CSV
+                    try:
+                        self.data = pd.read_csv(file_path, encoding='latin-1')
+                    except:
+                        raise ValueError(f"Cannot read CSV file: {csv_error}")
             else:
-                raise ValueError(f"Unsupported file format: {file_path}")
+                raise ValueError(f"Unsupported file format: {file_path}. Please use .xlsx or .csv files.")
             
             self.file_type = file_type
             return True
@@ -89,6 +114,54 @@ class RDProcessor:
             print(f"Error applying column mapping: {e}")
             return False
     
+    def aggregate_employee_data(self) -> pd.DataFrame:
+        """
+        Aggregate payroll data by employee, summing amounts and handling R&D percentages
+        
+        Returns:
+            DataFrame with one row per employee containing aggregated data
+        """
+        if self.data is None:
+            raise ValueError("No data loaded. Call load_data() first.")
+        
+        # Group by employee name and aggregate
+        aggregated_data = []
+        
+        for employee_name, group in self.data.groupby('Name'):
+            # Sum financial amounts
+            total_gross = group['Gross'].sum()
+            total_er_ni = group['ErNI'].sum()
+            total_er_pen = group['ErPen'].sum()
+            total_bonus = group['Bonus'].sum() if 'Bonus' in group.columns else 0
+            total_pilon = group['PILON'].sum() if 'PILON' in group.columns else 0
+            
+            # Handle R&D percentage - use the most recent value or average
+            rd_percentage = group['R&D %'].iloc[-1] if 'R&D %' in group.columns else 0.0
+            
+            # Get date range for this employee
+            start_date = group['Date'].min()
+            end_date = group['Date'].max()
+            period_count = len(group)
+            
+            # Create aggregated record
+            aggregated_record = {
+                'employee_name': employee_name,
+                'gross_cost': total_gross,
+                'er_ni_amount': total_er_ni,
+                'er_pension_amount': total_er_pen,
+                'bonus_amount': total_bonus,
+                'pilon_amount': total_pilon,
+                'rd_percentage': rd_percentage,
+                'start_date': start_date,
+                'end_date': end_date,
+                'period_count': period_count,
+                'description': f"Aggregated payroll data for {employee_name} ({period_count} periods)"
+            }
+            
+            aggregated_data.append(aggregated_record)
+        
+        return pd.DataFrame(aggregated_data)
+
     def calculate_rd_costs(self, employee_overrides: Optional[Dict] = None) -> Dict:
         """
         Calculate qualifying R&D costs based on the loaded data
@@ -102,6 +175,9 @@ class RDProcessor:
         if self.data is None:
             raise ValueError("No data loaded. Call load_data() first.")
         
+        # First aggregate the data by employee
+        aggregated_data = self.aggregate_employee_data()
+        
         results = {
             'total_costs': Decimal('0'),
             'qualifying_rd_costs': Decimal('0'),
@@ -114,8 +190,8 @@ class RDProcessor:
         
         employee_overrides = employee_overrides or {}
         
-        # Process each row in the data
-        for index, row in self.data.iterrows():
+        # Process each aggregated employee record
+        for index, row in aggregated_data.iterrows():
             line_item = self._process_line_item(row, employee_overrides)
             results['line_items'].append(line_item)
             
@@ -142,10 +218,10 @@ class RDProcessor:
     
     def _process_line_item(self, row: pd.Series, employee_overrides: Dict) -> Dict:
         """
-        Process a single line item from the data
+        Process a single line item from the aggregated data
         
         Args:
-            row: Pandas Series representing a row of data
+            row: Pandas Series representing an aggregated employee record
             employee_overrides: Employee-specific R&D percentages
             
         Returns:
@@ -154,38 +230,68 @@ class RDProcessor:
         # Extract basic information
         employee_name = row.get('employee_name', '')
         gross_cost = Decimal(str(row.get('gross_cost', 0)))
+        er_ni_amount = Decimal(str(row.get('er_ni_amount', 0)))
+        er_pension_amount = Decimal(str(row.get('er_pension_amount', 0)))
+        bonus_amount = Decimal(str(row.get('bonus_amount', 0)))
+        pilon_amount = Decimal(str(row.get('pilon_amount', 0)))
         cost_description = row.get('description', '')
         
         # Determine if this is EPW (externally provided worker)
         is_epw = row.get('is_epw', False)
         epw_connected = row.get('epw_connected', False)
         
-        # Check for exclusions
-        excluded = self._should_exclude_cost(cost_description, gross_cost)
+        # Get R&D percentage - from data or override
+        rd_percentage = self._get_rd_percentage(employee_name, employee_overrides, row.get('rd_percentage', 0.0))
         
-        # Calculate R&D percentage
-        rd_percentage = self._get_rd_percentage(employee_name, employee_overrides)
+        # Calculate qualifying amounts
+        # Start with gross salary + ER NI + ER Pension (qualifying components)
+        qualifying_base = gross_cost + er_ni_amount + er_pension_amount
         
-        # Calculate qualifying cost
-        qualifying_cost = Decimal('0')
-        if not excluded:
-            qualifying_cost = gross_cost * Decimal(str(rd_percentage))
-            
-            # Apply EPW cap if applicable
-            if is_epw:
-                epw_cap = gross_cost * Decimal(str(self.rules['epw_cap_percentage']))
-                qualifying_cost = min(qualifying_cost, epw_cap)
+        # Handle exclusions
+        excluded_amount = Decimal('0')
+        exclusion_reasons = []
+        
+        # PILON is always excluded
+        if pilon_amount > 0:
+            excluded_amount += pilon_amount
+            exclusion_reasons.append(f"PILON: £{pilon_amount}")
+        
+        # Bonus might be excluded (configurable)
+        if bonus_amount > 0:
+            excluded_amount += bonus_amount
+            exclusion_reasons.append(f"Bonus: £{bonus_amount}")
+        
+        # Total eligible amount (before R&D percentage)
+        eligible_amount = qualifying_base
+        
+        # Apply R&D percentage
+        qualifying_cost = eligible_amount * Decimal(str(rd_percentage))
+        
+        # Apply EPW cap if applicable
+        if is_epw:
+            epw_cap = eligible_amount * Decimal(str(self.rules['epw_cap_percentage']))
+            qualifying_cost = min(qualifying_cost, epw_cap)
+        
+        # Determine if line item is excluded
+        excluded = excluded_amount > 0
+        exclusion_reason = "; ".join(exclusion_reasons) if exclusion_reasons else None
         
         return {
             'employee_name': employee_name,
             'description': cost_description,
             'gross_cost': gross_cost,
+            'er_ni_amount': er_ni_amount,
+            'er_pension_amount': er_pension_amount,
+            'bonus_amount': bonus_amount,
+            'pilon_amount': pilon_amount,
+            'eligible_amount': eligible_amount,
+            'excluded_amount': excluded_amount,
             'rd_percentage': rd_percentage,
             'qualifying_cost': qualifying_cost,
             'is_epw': is_epw,
             'epw_connected': epw_connected,
             'excluded': excluded,
-            'exclusion_reason': self._get_exclusion_reason(cost_description, gross_cost)
+            'exclusion_reason': exclusion_reason
         }
     
     def _should_exclude_cost(self, description: str, gross_cost: Decimal) -> bool:
@@ -224,19 +330,25 @@ class RDProcessor:
         
         return None
     
-    def _get_rd_percentage(self, employee_name: str, employee_overrides: Dict) -> float:
+    def _get_rd_percentage(self, employee_name: str, employee_overrides: Dict, data_rd_percentage: float = 0.0) -> float:
         """
         Get the R&D percentage for an employee
         
         Args:
             employee_name: Name of the employee
             employee_overrides: Employee-specific R&D percentages
+            data_rd_percentage: R&D percentage from the data file
             
         Returns:
             R&D percentage as a float between 0 and 1
         """
+        # Priority: 1. Manual override, 2. Data file, 3. Default
         if employee_name in employee_overrides:
             return employee_overrides[employee_name]
+        
+        # Use percentage from data file if available
+        if data_rd_percentage > 0:
+            return data_rd_percentage
         
         # Return default R&D percentage
         return 0.8  # Default 80% R&D

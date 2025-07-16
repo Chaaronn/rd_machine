@@ -5,40 +5,50 @@
 categories:
   staff:
     display_name: "Staff"
-    description: "Employee costs including salaries, benefits, and related expenses"
+    description: "Employee costs including salaries, Er NI & Pension, and related expenses"
     required_fields:
-      - name
-      - gross_amount
-      - r_and_d_percentage
-      - r_and_d_activity
+      - Date
+      - Name
+      - Gross
+      - ErNI
+      - ErPen
+      - "R&D %"
     optional_fields:
+      - Bonus
+      - PILON
       - role
       - cost_date
-      - connected
       - grant_funded
       - grant_source
       - is_excluded
       - exclusion_reason
       - notes
     field_labels:
-      name: "Employee Name"
+      Date: "Pay Date"
+      Name: "Employee Name"
+      Gross: "Gross Salary"
+      ErNI: "Employer NI"
+      ErPen: "Employer Pension"
+      "R&D %": "R&D Percentage"
+      Bonus: "Bonus Amount"
+      PILON: "Payment in Lieu of Notice"
       role: "Job Title"
-      gross_amount: "Gross Salary"
-      r_and_d_percentage: "R&D Time %"
-      r_and_d_activity: "R&D Activities"
       cost_date: "Employment Date"
-      connected: "Connected Person"
       grant_funded: "Grant Funded"
       grant_source: "Grant Source"
       is_excluded: "Exclude from R&D"
       exclusion_reason: "Exclusion Reason"
       notes: "Additional Notes"
     field_help:
-      name: "Full name of the employee"
+      Date: "Date of the pay period (DD/MM/YY format)"
+      Name: "Full name of the employee"
+      Gross: "Gross salary amount for the pay period"
+      ErNI: "Employer National Insurance contribution amount"
+      ErPen: "Employer pension contribution amount"
+      "R&D %": "R&D percentage as decimal (0.5 = 50%)"
+      Bonus: "Bonus amount paid in this period"
+      PILON: "Payment in lieu of notice (typically excluded from R&D)"
       role: "Job title or position (e.g., Senior Developer, Research Scientist)"
-      gross_amount: "Total gross salary including benefits"
-      r_and_d_percentage: "Percentage of time spent on R&D activities"
-      r_and_d_activity: "Description of R&D work performed by this employee"
       cost_date: "Date when employment started (for period-specific calculations)"
       connected: "Check if this is a director, shareholder, or connected person"
       grant_funded: "Check if this cost is funded by a grant or subsidy"
@@ -272,50 +282,6 @@ categories:
       is_excluded: "Check if this item should be excluded from R&D calculations"
       exclusion_reason: "Reason for exclusion"
       notes: "Any additional notes about these items"
-
-  equipment:
-    display_name: "Equipment"
-    description: "Capital equipment and machinery used in R&D"
-    required_fields:
-      - name
-      - gross_amount
-      - r_and_d_percentage
-      - r_and_d_activity
-    optional_fields:
-      - company_name
-      - role
-      - cost_date
-      - grant_funded
-      - grant_source
-      - is_excluded
-      - exclusion_reason
-      - notes
-    field_labels:
-      name: "Equipment Name"
-      company_name: "Manufacturer"
-      role: "Equipment Type"
-      gross_amount: "Equipment Cost"
-      r_and_d_percentage: "R&D Usage %"
-      r_and_d_activity: "R&D Activities"
-      cost_date: "Purchase Date"
-      grant_funded: "Grant Funded"
-      grant_source: "Grant Source"
-      is_excluded: "Exclude from R&D"
-      exclusion_reason: "Exclusion Reason"
-      notes: "Additional Notes"
-    field_help:
-      name: "Name of the equipment"
-      company_name: "Name of the equipment manufacturer"
-      role: "Type of equipment (e.g., Testing Equipment, Prototyping Tools)"
-      gross_amount: "Total cost of the equipment"
-      r_and_d_percentage: "Percentage of usage for R&D activities"
-      r_and_d_activity: "Description of how the equipment is used for R&D"
-      cost_date: "Date when equipment was purchased"
-      grant_funded: "Check if this cost is funded by a grant or subsidy"
-      grant_source: "Source of grant funding"
-      is_excluded: "Check if this item should be excluded from R&D calculations"
-      exclusion_reason: "Reason for exclusion"
-      notes: "Any additional notes about this equipment"
 
   other:
     display_name: "Other"

@@ -252,7 +252,7 @@ class CostLineItem(models.Model):
     )
     
     # Additional metadata
-    tags = models.JSONField(default=list, blank=True, help_text="Tags like NIC uplift, capped, etc.")
+    tags = models.JSONField(default=dict, blank=True, help_text="Tags and additional data like individual amounts")
     notes = models.TextField(blank=True, help_text="Freeform notes")
     
     # User and timestamps
@@ -273,6 +273,10 @@ class CostLineItem(models.Model):
     
     def save(self, *args, **kwargs):
         """Calculate eligible amount with EPW restrictions before saving"""
+        # Initialize tags as dict if not already
+        if not isinstance(self.tags, dict):
+            self.tags = {}
+            
         if not self.is_excluded:
             # Basic calculation: gross_amount * r_and_d_percentage
             base_amount = (self.gross_amount * self.r_and_d_percentage) / 100
@@ -281,13 +285,12 @@ class CostLineItem(models.Model):
             # TODO: Move this to a config file, just in case it changes in future
             if self.type == 'epw' and not self.connected:
                 self.eligible_amount = base_amount * Decimal('0.65')
-                if 'epw_capped' not in self.tags:
-                    self.tags.append('epw_capped')
+                self.tags['epw_capped'] = True
             else:
                 self.eligible_amount = base_amount
                 # Remove capped tag if no longer applicable
                 if 'epw_capped' in self.tags:
-                    self.tags.remove('epw_capped')
+                    del self.tags['epw_capped']
         else:
             self.eligible_amount = 0
         

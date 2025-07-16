@@ -61,7 +61,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-warning text-white">
+            <div class="card bg-dark text-white">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
@@ -141,7 +141,7 @@
                                     </thead>
                                     <tbody>
                                         {% for item in items_by_type.staff %}
-                                        <tr class="{% if item.is_excluded %}table-warning{% endif %}">
+                                        <tr class="{% if item.is_excluded %}table-dark{% endif %}">
                                             <td class="text-white">{{ item.name }}</td>
                                             <td class="text-white">{{ item.role|default:"-" }}</td>
                                             <td class="text-white">£{{ item.gross_amount|floatformat:2 }}</td>
@@ -191,7 +191,7 @@
                                     </thead>
                                     <tbody>
                                         {% for item in items_by_type.epw %}
-                                        <tr class="{% if item.is_excluded %}table-warning{% endif %}">
+                                        <tr class="{% if item.is_excluded %}table-dark{% endif %}">
                                             <td class="text-white">{{ item.name }}</td>
                                             <td class="text-white">
                                                 {% if item.connected %}
@@ -223,7 +223,7 @@
                                                 {% if item.connected %}
                                                     <span class="badge bg-info">Connected</span>
                                                 {% else %}
-                                                    <span class="badge bg-warning">Unconnected EPW - 65% cap</span>
+                                                    <span class="badge bg-dark">Unconnected EPW - 65% cap</span>
                                                 {% endif %}
                                                 
                                                 {% if item.grant_funded %}
@@ -256,7 +256,7 @@
                                         </thead>
                                         <tbody>
                                             {% for item in items %}
-                                            <tr class="{% if item.is_excluded %}table-warning{% endif %}">
+                                            <tr class="{% if item.is_excluded %}table-dark{% endif %}">
                                                 <td class="text-white">{{ item.name }}</td>
                                                 <td class="text-white">{{ item.role|default:"-" }}</td>
                                                 <td class="text-white">£{{ item.gross_amount|floatformat:2 }}</td>
@@ -283,7 +283,7 @@
                                                         {% if item.connected %}
                                                             <span class="badge bg-info">Connected</span>
                                                         {% else %}
-                                                            <span class="badge bg-warning">Unconnected</span>
+                                                            <span class="badge bg-dark">Unconnected</span>
                                                         {% endif %}
                                                     {% endif %}
                                                     
